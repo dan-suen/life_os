@@ -1,33 +1,49 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import type { CSSProperties } from "react";
 
 const AREAS = [
   "Work / Career",
   "Health & Fitness",
   "Personal Projects & Hobbies",
   "Finances",
-];
+] as const;
+type Area = (typeof AREAS)[number];
 
 const STATUSES = [
   { label: "Keep", color: "#4ade80", bg: "#052e16", dot: "#4ade80" },
   { label: "Pause", color: "#facc15", bg: "#1c1917", dot: "#facc15" },
   { label: "Delegate", color: "#60a5fa", bg: "#0c1a2e", dot: "#60a5fa" },
   { label: "Drop", color: "#f87171", bg: "#2d0a0a", dot: "#f87171" },
-];
+] as const;
+type StatusLabel = (typeof STATUSES)[number]["label"];
 
-const EFFORTS = ["Low", "Medium", "High"];
-const IMPACTS = ["Low", "Medium", "High"];
+const EFFORTS = ["Low", "Medium", "High"] as const;
+type Effort = (typeof EFFORTS)[number];
 
-const impactScore = { Low: 1, Medium: 2, High: 3 };
-const effortScore = { Low: 3, Medium: 2, High: 1 };
+const IMPACTS = ["Low", "Medium", "High"] as const;
+type Impact = (typeof IMPACTS)[number];
 
-function priorityScore(c) {
+interface Commitment {
+  id: number;
+  name: string;
+  area: Area;
+  status: StatusLabel;
+  effort: Effort;
+  impact: Impact;
+  note: string;
+}
+
+const impactScore: Record<Impact, number> = { Low: 1, Medium: 2, High: 3 };
+const effortScore: Record<Effort, number> = { Low: 3, Medium: 2, High: 1 };
+
+function priorityScore(c: Commitment): number {
   return impactScore[c.impact] * 2 + effortScore[c.effort];
 }
 
-const statusStyle = (label) =>
-  STATUSES.find((s) => s.label === label) || STATUSES[0];
+const statusStyle = (label: StatusLabel) =>
+  STATUSES.find((s) => s.label === label) ?? STATUSES[0];
 
-const defaultCommitment = () => ({
+const defaultCommitment = (): Commitment => ({
   id: Date.now() + Math.random(),
   name: "",
   area: AREAS[0],
@@ -38,14 +54,14 @@ const defaultCommitment = () => ({
 });
 
 export default function App() {
-  const [commitments, setCommitments] = useState([]);
-  const [filter, setFilter] = useState("All");
-  const [areaFilter, setAreaFilter] = useState("All");
-  const [editing, setEditing] = useState(null); // id of row being edited
-  const [form, setForm] = useState(null);
+  const [commitments, setCommitments] = useState<Commitment[]>([]);
+  const [filter, setFilter] = useState<StatusLabel | "All">("All");
+  const [areaFilter, setAreaFilter] = useState<Area | "All">("All");
+  const [editing, setEditing] = useState<number | null>(null);
+  const [form, setForm] = useState<Commitment | null>(null);
   const [showAdd, setShowAdd] = useState(false);
-  const [newForm, setNewForm] = useState(defaultCommitment());
-  const [sort, setSort] = useState("priority");
+  const [newForm, setNewForm] = useState<Commitment>(defaultCommitment());
+  const [sort, setSort] = useState<"priority" | "area" | "name">("priority");
 
   const sorted = [...commitments]
     .filter((c) => (filter === "All" ? true : c.status === filter))
@@ -57,7 +73,7 @@ export default function App() {
       return 0;
     });
 
-  const counts = STATUSES.reduce((acc, s) => {
+  const counts = STATUSES.reduce<Record<string, number>>((acc, s) => {
     acc[s.label] = commitments.filter((c) => c.status === s.label).length;
     return acc;
   }, {});
@@ -69,12 +85,13 @@ export default function App() {
     setShowAdd(false);
   }
 
-  function startEdit(c) {
+  function startEdit(c: Commitment) {
     setEditing(c.id);
     setForm({ ...c });
   }
 
   function saveEdit() {
+    if (!form) return;
     setCommitments((prev) =>
       prev.map((c) => (c.id === editing ? { ...form } : c))
     );
@@ -82,12 +99,12 @@ export default function App() {
     setForm(null);
   }
 
-  function deleteCommitment(id) {
+  function deleteCommitment(id: number) {
     setCommitments((prev) => prev.filter((c) => c.id !== id));
     if (editing === id) setEditing(null);
   }
 
-  function cycleStatus(id) {
+  function cycleStatus(id: number) {
     setCommitments((prev) =>
       prev.map((c) => {
         if (c.id !== id) return c;
@@ -97,7 +114,7 @@ export default function App() {
     );
   }
 
-  const style = {
+  const style: Record<string, CSSProperties> = {
     app: {
       minHeight: "100vh",
       background: "#0a0a0a",
@@ -116,35 +133,17 @@ export default function App() {
       textTransform: "uppercase",
       color: "#6b6b6b",
       marginBottom: "6px",
-      fontFamily: "'Georgia', serif",
     },
     h1: {
       fontSize: "clamp(28px, 4vw, 42px)",
-      fontWeight: "400",
+      fontWeight: 400,
       color: "#e8e0d5",
       margin: "0 0 24px",
       letterSpacing: "-0.02em",
       lineHeight: 1.1,
     },
-    pills: {
-      display: "flex",
-      gap: "8px",
-      flexWrap: "wrap",
-    },
-    pill: (active, color) => ({
-      padding: "5px 14px",
-      borderRadius: "100px",
-      fontSize: "12px",
-      letterSpacing: "0.05em",
-      border: `1px solid ${active ? color : "#2a2a2a"}`,
-      background: active ? color + "22" : "transparent",
-      color: active ? color : "#6b6b6b",
-      cursor: "pointer",
-      transition: "all 0.15s",
-    }),
-    main: {
-      padding: "24px 40px",
-    },
+    pills: { display: "flex", gap: "8px", flexWrap: "wrap" },
+    main: { padding: "24px 40px" },
     toolbar: {
       display: "flex",
       alignItems: "center",
@@ -163,7 +162,7 @@ export default function App() {
       cursor: "pointer",
       fontFamily: "'Georgia', serif",
       letterSpacing: "0.03em",
-      fontWeight: "600",
+      fontWeight: 600,
     },
     select: {
       background: "#111",
@@ -174,10 +173,16 @@ export default function App() {
       fontSize: "12px",
       cursor: "pointer",
     },
-    table: {
-      width: "100%",
-      borderCollapse: "collapse",
+    smallSelect: {
+      background: "#161616",
+      border: "1px solid #2a2a2a",
+      color: "#e8e0d5",
+      padding: "5px 8px",
+      borderRadius: "5px",
+      fontSize: "12px",
+      cursor: "pointer",
     },
+    table: { width: "100%", borderCollapse: "collapse" },
     th: {
       textAlign: "left",
       padding: "10px 14px",
@@ -187,32 +192,7 @@ export default function App() {
       color: "#4a4a4a",
       borderBottom: "1px solid #1a1a1a",
     },
-    tr: (i) => ({
-      borderBottom: "1px solid #141414",
-      background: i % 2 === 0 ? "#0a0a0a" : "#0d0d0d",
-      transition: "background 0.1s",
-    }),
-    td: {
-      padding: "12px 14px",
-      fontSize: "14px",
-      verticalAlign: "middle",
-    },
-    statusBadge: (label) => {
-      const s = statusStyle(label);
-      return {
-        display: "inline-block",
-        padding: "3px 10px",
-        borderRadius: "100px",
-        fontSize: "11px",
-        letterSpacing: "0.06em",
-        border: `1px solid ${s.color}44`,
-        color: s.color,
-        background: s.color + "18",
-        cursor: "pointer",
-        userSelect: "none",
-        whiteSpace: "nowrap",
-      };
-    },
+    td: { padding: "12px 14px", fontSize: "14px", verticalAlign: "middle" },
     input: {
       background: "#161616",
       border: "1px solid #2a2a2a",
@@ -223,15 +203,6 @@ export default function App() {
       width: "100%",
       fontFamily: "'Georgia', serif",
     },
-    smallSelect: {
-      background: "#161616",
-      border: "1px solid #2a2a2a",
-      color: "#e8e0d5",
-      padding: "5px 8px",
-      borderRadius: "5px",
-      fontSize: "12px",
-      cursor: "pointer",
-    },
     saveBtn: {
       background: "#4ade80",
       color: "#000",
@@ -240,7 +211,7 @@ export default function App() {
       borderRadius: "5px",
       fontSize: "12px",
       cursor: "pointer",
-      fontWeight: "600",
+      fontWeight: 600,
     },
     cancelBtn: {
       background: "transparent",
@@ -264,44 +235,12 @@ export default function App() {
       borderTop: "1px solid #2a2a2a",
       borderBottom: "1px solid #2a2a2a",
     },
-    priorityDot: (score) => {
-      const color = score >= 8 ? "#f87171" : score >= 6 ? "#facc15" : "#4ade80";
-      return {
-        width: "8px",
-        height: "8px",
-        borderRadius: "50%",
-        background: color,
-        display: "inline-block",
-        marginRight: "6px",
-        verticalAlign: "middle",
-      };
-    },
-    empty: {
-      textAlign: "center",
-      padding: "60px 20px",
-      color: "#3a3a3a",
-      fontSize: "14px",
-    },
     statsRow: {
       display: "flex",
       gap: "16px",
       marginBottom: "24px",
       flexWrap: "wrap",
     },
-    statCard: (color) => ({
-      flex: "1",
-      minWidth: "100px",
-      padding: "16px",
-      borderRadius: "8px",
-      border: `1px solid ${color}33`,
-      background: color + "0a",
-    }),
-    statNum: (color) => ({
-      fontSize: "28px",
-      fontWeight: "300",
-      color: color,
-      lineHeight: 1,
-    }),
     statLabel: {
       fontSize: "10px",
       letterSpacing: "0.12em",
@@ -309,7 +248,74 @@ export default function App() {
       textTransform: "uppercase",
       marginTop: "4px",
     },
+    empty: {
+      textAlign: "center",
+      padding: "60px 20px",
+      color: "#3a3a3a",
+      fontSize: "14px",
+    },
+    footer: {
+      padding: "16px 40px",
+      borderTop: "1px solid #141414",
+      fontSize: "11px",
+      color: "#2a2a2a",
+      letterSpacing: "0.05em",
+    },
   };
+
+  const pillStyle = (active: boolean, color: string): CSSProperties => ({
+    padding: "5px 14px",
+    borderRadius: "100px",
+    fontSize: "12px",
+    letterSpacing: "0.05em",
+    border: `1px solid ${active ? color : "#2a2a2a"}`,
+    background: active ? color + "22" : "transparent",
+    color: active ? color : "#6b6b6b",
+    cursor: "pointer",
+    transition: "all 0.15s",
+  });
+
+  const trStyle = (i: number): CSSProperties => ({
+    borderBottom: "1px solid #141414",
+    background: i % 2 === 0 ? "#0a0a0a" : "#0d0d0d",
+    transition: "background 0.1s",
+  });
+
+  const badgeStyle = (label: StatusLabel): CSSProperties => {
+    const s = statusStyle(label);
+    return {
+      display: "inline-block",
+      padding: "3px 10px",
+      borderRadius: "100px",
+      fontSize: "11px",
+      letterSpacing: "0.06em",
+      border: `1px solid ${s.color}44`,
+      color: s.color,
+      background: s.color + "18",
+      cursor: "pointer",
+      userSelect: "none",
+      whiteSpace: "nowrap",
+    };
+  };
+
+  const statCardStyle = (color: string): CSSProperties => ({
+    flex: "1",
+    minWidth: "100px",
+    padding: "16px",
+    borderRadius: "8px",
+    border: `1px solid ${color}33`,
+    background: color + "0a",
+  });
+
+  const dotStyle = (score: number): CSSProperties => ({
+    width: "8px",
+    height: "8px",
+    borderRadius: "50%",
+    background: score >= 8 ? "#f87171" : score >= 6 ? "#facc15" : "#4ade80",
+    display: "inline-block",
+    marginRight: "6px",
+    verticalAlign: "middle",
+  });
 
   return (
     <div style={style.app}>
@@ -317,21 +323,19 @@ export default function App() {
         <div style={style.title}>Life OS</div>
         <h1 style={style.h1}>Commitment Triage</h1>
         <div style={style.pills}>
-          {["All", ...STATUSES.map((s) => s.label)].map((f) => {
+          {(["All", ...STATUSES.map((s) => s.label)] as const).map((f) => {
             const s = STATUSES.find((x) => x.label === f);
             const color = s ? s.color : "#e8e0d5";
             return (
               <button
                 key={f}
-                style={style.pill(filter === f, color)}
-                onClick={() => setFilter(f)}
+                style={pillStyle(filter === f, color)}
+                onClick={() => setFilter(f as StatusLabel | "All")}
               >
                 {f}{" "}
-                {f !== "All" && counts[f] !== undefined
-                  ? `(${counts[f]})`
-                  : f === "All"
-                  ? `(${commitments.length})`
-                  : ""}
+                {f !== "All"
+                  ? `(${counts[f] ?? 0})`
+                  : `(${commitments.length})`}
               </button>
             );
           })}
@@ -342,8 +346,17 @@ export default function App() {
         {commitments.length > 0 && (
           <div style={style.statsRow}>
             {STATUSES.map((s) => (
-              <div key={s.label} style={style.statCard(s.color)}>
-                <div style={style.statNum(s.color)}>{counts[s.label] || 0}</div>
+              <div key={s.label} style={statCardStyle(s.color)}>
+                <div
+                  style={{
+                    fontSize: "28px",
+                    fontWeight: 300,
+                    color: s.color,
+                    lineHeight: 1,
+                  }}
+                >
+                  {counts[s.label] || 0}
+                </div>
                 <div style={style.statLabel}>{s.label}</div>
               </div>
             ))}
@@ -355,7 +368,7 @@ export default function App() {
             <select
               style={style.select}
               value={areaFilter}
-              onChange={(e) => setAreaFilter(e.target.value)}
+              onChange={(e) => setAreaFilter(e.target.value as Area | "All")}
             >
               <option value="All">All areas</option>
               {AREAS.map((a) => (
@@ -365,7 +378,9 @@ export default function App() {
             <select
               style={style.select}
               value={sort}
-              onChange={(e) => setSort(e.target.value)}
+              onChange={(e) =>
+                setSort(e.target.value as "priority" | "area" | "name")
+              }
             >
               <option value="priority">Sort: Priority</option>
               <option value="area">Sort: Area</option>
@@ -386,14 +401,20 @@ export default function App() {
         <table style={style.table}>
           <thead>
             <tr>
-              <th style={style.th}>Commitment</th>
-              <th style={style.th}>Area</th>
-              <th style={style.th}>Status</th>
-              <th style={style.th}>Effort</th>
-              <th style={style.th}>Impact</th>
-              <th style={style.th}>Priority</th>
-              <th style={style.th}>Note</th>
-              <th style={style.th}></th>
+              {[
+                "Commitment",
+                "Area",
+                "Status",
+                "Effort",
+                "Impact",
+                "Priority",
+                "Note",
+                "",
+              ].map((h) => (
+                <th key={h} style={style.th}>
+                  {h}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
@@ -419,7 +440,7 @@ export default function App() {
                     style={style.smallSelect}
                     value={newForm.area}
                     onChange={(e) =>
-                      setNewForm({ ...newForm, area: e.target.value })
+                      setNewForm({ ...newForm, area: e.target.value as Area })
                     }
                   >
                     {AREAS.map((a) => (
@@ -432,7 +453,10 @@ export default function App() {
                     style={style.smallSelect}
                     value={newForm.status}
                     onChange={(e) =>
-                      setNewForm({ ...newForm, status: e.target.value })
+                      setNewForm({
+                        ...newForm,
+                        status: e.target.value as StatusLabel,
+                      })
                     }
                   >
                     {STATUSES.map((s) => (
@@ -445,7 +469,10 @@ export default function App() {
                     style={style.smallSelect}
                     value={newForm.effort}
                     onChange={(e) =>
-                      setNewForm({ ...newForm, effort: e.target.value })
+                      setNewForm({
+                        ...newForm,
+                        effort: e.target.value as Effort,
+                      })
                     }
                   >
                     {EFFORTS.map((e) => (
@@ -458,7 +485,10 @@ export default function App() {
                     style={style.smallSelect}
                     value={newForm.impact}
                     onChange={(e) =>
-                      setNewForm({ ...newForm, impact: e.target.value })
+                      setNewForm({
+                        ...newForm,
+                        impact: e.target.value as Impact,
+                      })
                     }
                   >
                     {IMPACTS.map((i) => (
@@ -504,11 +534,8 @@ export default function App() {
             )}
 
             {sorted.map((c, i) =>
-              editing === c.id ? (
-                <tr
-                  key={c.id}
-                  style={{ ...style.tr(i), background: "#121212" }}
-                >
+              editing === c.id && form ? (
+                <tr key={c.id} style={{ ...trStyle(i), background: "#121212" }}>
                   <td style={style.td}>
                     <input
                       autoFocus
@@ -528,7 +555,7 @@ export default function App() {
                       style={style.smallSelect}
                       value={form.area}
                       onChange={(e) =>
-                        setForm({ ...form, area: e.target.value })
+                        setForm({ ...form, area: e.target.value as Area })
                       }
                     >
                       {AREAS.map((a) => (
@@ -541,7 +568,10 @@ export default function App() {
                       style={style.smallSelect}
                       value={form.status}
                       onChange={(e) =>
-                        setForm({ ...form, status: e.target.value })
+                        setForm({
+                          ...form,
+                          status: e.target.value as StatusLabel,
+                        })
                       }
                     >
                       {STATUSES.map((s) => (
@@ -554,7 +584,7 @@ export default function App() {
                       style={style.smallSelect}
                       value={form.effort}
                       onChange={(e) =>
-                        setForm({ ...form, effort: e.target.value })
+                        setForm({ ...form, effort: e.target.value as Effort })
                       }
                     >
                       {EFFORTS.map((e) => (
@@ -567,7 +597,7 @@ export default function App() {
                       style={style.smallSelect}
                       value={form.impact}
                       onChange={(e) =>
-                        setForm({ ...form, impact: e.target.value })
+                        setForm({ ...form, impact: e.target.value as Impact })
                       }
                     >
                       {IMPACTS.map((imp) => (
@@ -603,11 +633,11 @@ export default function App() {
               ) : (
                 <tr
                   key={c.id}
-                  style={style.tr(i)}
+                  style={trStyle(i)}
                   onDoubleClick={() => startEdit(c)}
                 >
                   <td
-                    style={{ ...style.td, fontWeight: "500", color: "#d4ccc4" }}
+                    style={{ ...style.td, fontWeight: 500, color: "#d4ccc4" }}
                   >
                     {c.name || (
                       <span style={{ color: "#3a3a3a" }}>Unnamed</span>
@@ -620,9 +650,8 @@ export default function App() {
                   </td>
                   <td style={style.td}>
                     <span
-                      style={style.statusBadge(c.status)}
+                      style={badgeStyle(c.status)}
                       onClick={() => cycleStatus(c.id)}
-                      title="Click to cycle status"
                     >
                       {c.status}
                     </span>
@@ -638,7 +667,7 @@ export default function App() {
                     {c.impact}
                   </td>
                   <td style={style.td}>
-                    <span style={style.priorityDot(priorityScore(c))}></span>
+                    <span style={dotStyle(priorityScore(c))}></span>
                     <span style={{ fontSize: "12px", color: "#6b6b6b" }}>
                       {priorityScore(c)}
                     </span>
@@ -661,14 +690,12 @@ export default function App() {
                       <button
                         style={{ ...style.deleteBtn, color: "#4a4a4a" }}
                         onClick={() => startEdit(c)}
-                        title="Edit"
                       >
                         ✎
                       </button>
                       <button
                         style={style.deleteBtn}
                         onClick={() => deleteCommitment(c.id)}
-                        title="Delete"
                       >
                         ✕
                       </button>
@@ -681,15 +708,7 @@ export default function App() {
         </table>
       </div>
 
-      <div
-        style={{
-          padding: "16px 40px",
-          borderTop: "1px solid #141414",
-          fontSize: "11px",
-          color: "#2a2a2a",
-          letterSpacing: "0.05em",
-        }}
-      >
+      <div style={style.footer}>
         Double-click any row to edit · Click a status badge to cycle it · Sort
         by priority to see what to cut first
       </div>
