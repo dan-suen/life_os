@@ -325,28 +325,20 @@ export default function App() {
     const dl = daysLabel(c.deadline);
     const tc = TIER_COLORS[c.tier];
     const rowBg = c.completed ? "#f9f9f9" : i % 2 === 0 ? "#ffffff" : "#fafafa";
-    if (editing === c.id && editForm) {
+
+    // When editing, show a highlighted placeholder row instead of inline form
+    if (editing === c.id) {
       return (
-        <tr key={c.id} style={{ background: "#fffef5" }}>
-          <td style={s.td}><input type="checkbox" checked={editForm.completed} onChange={() => setEditForm({ ...editForm, completed: !editForm.completed })} /></td>
-          <td style={s.td}><input style={s.input} value={editForm.name} autoFocus onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} onKeyDown={(e) => { if (e.key === "Enter") saveEdit(); if (e.key === "Escape") { setEditing(null); setEditForm(null); }}} /></td>
-          <td style={s.td}><select style={s.smallSel} value={editForm.tier} onChange={(e) => setEditForm({ ...editForm, tier: e.target.value as Tier })}>{TIERS.map((t) => <option key={t}>{t}</option>)}</select></td>
-          {showArea && <td style={s.td}><select style={s.smallSel} value={editForm.area} onChange={(e) => setEditForm({ ...editForm, area: e.target.value as Area })}>{AREAS.map((a) => <option key={a}>{a}</option>)}</select></td>}
-          <td style={s.td}><select style={s.smallSel} value={editForm.effort} onChange={(e) => setEditForm({ ...editForm, effort: e.target.value as Effort })}>{EFFORTS.map((e) => <option key={e}>{e}</option>)}</select></td>
-          <td style={s.td}><select style={s.smallSel} value={editForm.impact} onChange={(e) => setEditForm({ ...editForm, impact: e.target.value as Impact })}>{IMPACTS.map((imp) => <option key={imp}>{imp}</option>)}</select></td>
-          <td style={s.td}><select style={s.smallSel} value={editForm.energy} onChange={(e) => setEditForm({ ...editForm, energy: e.target.value as Energy })}>{ENERGIES.map((en) => <option key={en}>{en}</option>)}</select></td>
-          <td style={s.td}><input type="date" style={{ ...s.input, fontSize: "12px" }} value={editForm.deadline ?? ""} onChange={(e) => setEditForm({ ...editForm, deadline: e.target.value || null })} /></td>
-          <td style={s.td}><span style={{ fontSize: "12px", color: "#888" }}>—</span></td>
-          <td style={s.td}><input style={s.input} value={editForm.note} placeholder="Note…" onChange={(e) => setEditForm({ ...editForm, note: e.target.value })} /></td>
-          <td style={s.td}>
-            <div style={{ display: "flex", gap: "4px" }}>
-              <button style={s.btn("#fff", "#1a9e5c", "#1a9e5c")} disabled={saving} onClick={saveEdit}>Save</button>
-              <button style={s.iconBtn} onClick={() => { setEditing(null); setEditForm(null); }}>✕</button>
-            </div>
+        <tr key={c.id} style={{ background: "#fffbea", outline: "2px solid #f0c040" }}>
+          <td style={s.td} colSpan={showArea ? 11 : 10}>
+            <span style={{ fontSize: "12px", color: "#b07d00", fontStyle: "italic" }}>
+              Editing "{c.name}" — see panel above
+            </span>
           </td>
         </tr>
       );
     }
+
     return (
       <tr key={c.id} style={{ background: rowBg }} onDoubleClick={() => { setEditing(c.id); setEditForm({ ...c }); }}>
         <td style={s.td}><input type="checkbox" checked={c.completed} onChange={() => toggleComplete(c)} /></td>
@@ -373,22 +365,83 @@ export default function App() {
     );
   }
 
-  function renderAddRow() {
-    if (!showAdd) return null;
+  // ─── Floating edit panel (outside table, no column constraints) ───────────
+  function renderEditPanel() {
+    if (!editing || !editForm) return null;
+    const fieldStyle: CSSProperties = { display: "flex", flexDirection: "column", gap: "4px", minWidth: "120px", flex: 1 };
+    const labelStyle: CSSProperties = { fontSize: "10px", fontWeight: 600, color: "#666", textTransform: "uppercase", letterSpacing: "0.05em" };
     return (
-      <tr style={s.addRowBg}>
-        <td style={s.td}></td>
-        <td style={s.td}><input autoFocus style={s.input} placeholder="Name…" value={newForm.name} onChange={(e) => setNewForm({ ...newForm, name: e.target.value })} onKeyDown={(e) => { if (e.key === "Enter") addCommitment(); if (e.key === "Escape") setShowAdd(false); }} /></td>
-        <td style={s.td}><select style={s.smallSel} value={newForm.tier} onChange={(e) => setNewForm({ ...newForm, tier: e.target.value as Tier })}>{TIERS.map((t) => <option key={t}>{t}</option>)}</select></td>
-        {showArea && <td style={s.td}><select style={s.smallSel} value={newForm.area} onChange={(e) => setNewForm({ ...newForm, area: e.target.value as Area })}>{AREAS.map((a) => <option key={a}>{a}</option>)}</select></td>}
-        <td style={s.td}><select style={s.smallSel} value={newForm.effort} onChange={(e) => setNewForm({ ...newForm, effort: e.target.value as Effort })}>{EFFORTS.map((e) => <option key={e}>{e}</option>)}</select></td>
-        <td style={s.td}><select style={s.smallSel} value={newForm.impact} onChange={(e) => setNewForm({ ...newForm, impact: e.target.value as Impact })}>{IMPACTS.map((imp) => <option key={imp}>{imp}</option>)}</select></td>
-        <td style={s.td}><select style={s.smallSel} value={newForm.energy} onChange={(e) => setNewForm({ ...newForm, energy: e.target.value as Energy })}>{ENERGIES.map((en) => <option key={en}>{en}</option>)}</select></td>
-        <td style={s.td}><input type="date" style={{ ...s.input, fontSize: "12px" }} value={newForm.deadline ?? ""} onChange={(e) => setNewForm({ ...newForm, deadline: e.target.value || null })} /></td>
-        <td style={s.td}>—</td>
-        <td style={s.td}><input style={s.input} placeholder="Note…" value={newForm.note} onChange={(e) => setNewForm({ ...newForm, note: e.target.value })} /></td>
-        <td style={s.td}><div style={{ display: "flex", gap: "4px" }}><button style={s.btn("#fff", "#1a9e5c", "#1a9e5c")} disabled={saving} onClick={addCommitment}>Add</button><button style={s.iconBtn} onClick={() => setShowAdd(false)}>✕</button></div></td>
-      </tr>
+      <div style={{ background: "#fffbea", border: "1px solid #f0c040", borderRadius: "8px", padding: "16px", marginBottom: "12px" }}>
+        <div style={{ fontSize: "12px", fontWeight: 600, color: "#b07d00", marginBottom: "12px" }}>
+          Editing commitment
+        </div>
+        {/* Row 1: name + note */}
+        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginBottom: "10px" }}>
+          <div style={{ ...fieldStyle, flex: 3, minWidth: "180px" }}>
+            <label style={labelStyle}>Name</label>
+            <input autoFocus style={s.input} value={editForm.name}
+              onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+              onKeyDown={(e) => { if (e.key === "Enter") saveEdit(); if (e.key === "Escape") { setEditing(null); setEditForm(null); }}} />
+          </div>
+          <div style={{ ...fieldStyle, flex: 2, minWidth: "140px" }}>
+            <label style={labelStyle}>Note</label>
+            <input style={s.input} value={editForm.note} placeholder="Note…"
+              onChange={(e) => setEditForm({ ...editForm, note: e.target.value })} />
+          </div>
+        </div>
+        {/* Row 2: dropdowns + deadline */}
+        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginBottom: "12px" }}>
+          {showArea && (
+            <div style={fieldStyle}>
+              <label style={labelStyle}>Area</label>
+              <select style={s.smallSel} value={editForm.area} onChange={(e) => setEditForm({ ...editForm, area: e.target.value as Area })}>
+                {AREAS.map((a) => <option key={a}>{a}</option>)}
+              </select>
+            </div>
+          )}
+          <div style={fieldStyle}>
+            <label style={labelStyle}>Tier</label>
+            <select style={s.smallSel} value={editForm.tier} onChange={(e) => setEditForm({ ...editForm, tier: e.target.value as Tier })}>
+              {TIERS.map((t) => <option key={t}>{t}</option>)}
+            </select>
+          </div>
+          <div style={fieldStyle}>
+            <label style={labelStyle}>Effort</label>
+            <select style={s.smallSel} value={editForm.effort} onChange={(e) => setEditForm({ ...editForm, effort: e.target.value as Effort })}>
+              {EFFORTS.map((e) => <option key={e}>{e}</option>)}
+            </select>
+          </div>
+          <div style={fieldStyle}>
+            <label style={labelStyle}>Impact</label>
+            <select style={s.smallSel} value={editForm.impact} onChange={(e) => setEditForm({ ...editForm, impact: e.target.value as Impact })}>
+              {IMPACTS.map((i) => <option key={i}>{i}</option>)}
+            </select>
+          </div>
+          <div style={fieldStyle}>
+            <label style={labelStyle}>Energy</label>
+            <select style={s.smallSel} value={editForm.energy} onChange={(e) => setEditForm({ ...editForm, energy: e.target.value as Energy })}>
+              {ENERGIES.map((e) => <option key={e}>{e}</option>)}
+            </select>
+          </div>
+          <div style={fieldStyle}>
+            <label style={labelStyle}>Deadline</label>
+            <input type="date" style={{ ...s.input, fontSize: "12px" }} value={editForm.deadline ?? ""}
+              onChange={(e) => setEditForm({ ...editForm, deadline: e.target.value || null })} />
+          </div>
+          <div style={fieldStyle}>
+            <label style={labelStyle}>Complete</label>
+            <div style={{ display: "flex", alignItems: "center", height: "32px" }}>
+              <input type="checkbox" checked={editForm.completed}
+                onChange={() => setEditForm({ ...editForm, completed: !editForm.completed })} />
+            </div>
+          </div>
+        </div>
+        {/* Actions */}
+        <div style={{ display: "flex", gap: "8px" }}>
+          <button style={s.btn("#fff", "#1a9e5c", "#1a9e5c")} disabled={saving} onClick={saveEdit}>Save</button>
+          <button style={s.btn("#555", "#f5f5f5", "#e0e0e0")} onClick={() => { setEditing(null); setEditForm(null); }}>Cancel</button>
+        </div>
+      </div>
     );
   }
 
@@ -484,6 +537,9 @@ export default function App() {
       ) : (
         <div style={s.main}>
 
+          {/* Floating edit panel — always visible at top of main when editing */}
+          {renderEditPanel()}
+
           {/* Urgent section — always on top in All Areas view */}
           {(tierFilter === "All" || tierFilter === "Urgent") && urgentItems.length > 0 && (
             <div style={{ ...s.section, borderColor: "#f5c6c6" }}>
@@ -526,19 +582,53 @@ export default function App() {
             </div>
           )}
 
-          {/* Add row — shown above first area table when not in a section */}
+          {/* Add panel — same layout as edit panel, no table constraints */}
           {showAdd && (
-            <div style={s.section}>
-              <div style={s.sectionHeader}>
-                <span style={s.sectionTitle}>New Commitment</span>
-                <button style={s.iconBtn} onClick={() => setShowAdd(false)}>✕</button>
+            <div style={{ background: "#f0fff4", border: "1px solid #a8e6c0", borderRadius: "8px", padding: "16px", marginBottom: "12px" }}>
+              <div style={{ fontSize: "12px", fontWeight: 600, color: "#1a9e5c", marginBottom: "12px" }}>New Commitment</div>
+              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginBottom: "10px" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "4px", flex: 3, minWidth: "180px" }}>
+                  <label style={{ fontSize: "10px", fontWeight: 600, color: "#666", textTransform: "uppercase" as const, letterSpacing: "0.05em" }}>Name</label>
+                  <input autoFocus style={s.input} placeholder="Name…" value={newForm.name}
+                    onChange={(e) => setNewForm({ ...newForm, name: e.target.value })}
+                    onKeyDown={(e) => { if (e.key === "Enter") addCommitment(); if (e.key === "Escape") setShowAdd(false); }} />
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "4px", flex: 2, minWidth: "140px" }}>
+                  <label style={{ fontSize: "10px", fontWeight: 600, color: "#666", textTransform: "uppercase" as const, letterSpacing: "0.05em" }}>Note</label>
+                  <input style={s.input} placeholder="Note…" value={newForm.note} onChange={(e) => setNewForm({ ...newForm, note: e.target.value })} />
+                </div>
               </div>
-              <div style={s.tableWrap}>
-                <table style={s.table}>
-                  <colgroup>{widths.map((w, i) => <col key={i} style={{ width: w }} />)}</colgroup>
-                  <TableHead />
-                  <tbody>{renderAddRow()}</tbody>
-                </table>
+              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginBottom: "12px" }}>
+                {showArea && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "4px", flex: 1, minWidth: "120px" }}>
+                    <label style={{ fontSize: "10px", fontWeight: 600, color: "#666", textTransform: "uppercase" as const, letterSpacing: "0.05em" }}>Area</label>
+                    <select style={s.smallSel} value={newForm.area} onChange={(e) => setNewForm({ ...newForm, area: e.target.value as Area })}>{AREAS.map((a) => <option key={a}>{a}</option>)}</select>
+                  </div>
+                )}
+                <div style={{ display: "flex", flexDirection: "column", gap: "4px", flex: 1, minWidth: "100px" }}>
+                  <label style={{ fontSize: "10px", fontWeight: 600, color: "#666", textTransform: "uppercase" as const, letterSpacing: "0.05em" }}>Tier</label>
+                  <select style={s.smallSel} value={newForm.tier} onChange={(e) => setNewForm({ ...newForm, tier: e.target.value as Tier })}>{TIERS.map((t) => <option key={t}>{t}</option>)}</select>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "4px", flex: 1, minWidth: "90px" }}>
+                  <label style={{ fontSize: "10px", fontWeight: 600, color: "#666", textTransform: "uppercase" as const, letterSpacing: "0.05em" }}>Effort</label>
+                  <select style={s.smallSel} value={newForm.effort} onChange={(e) => setNewForm({ ...newForm, effort: e.target.value as Effort })}>{EFFORTS.map((e) => <option key={e}>{e}</option>)}</select>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "4px", flex: 1, minWidth: "90px" }}>
+                  <label style={{ fontSize: "10px", fontWeight: 600, color: "#666", textTransform: "uppercase" as const, letterSpacing: "0.05em" }}>Impact</label>
+                  <select style={s.smallSel} value={newForm.impact} onChange={(e) => setNewForm({ ...newForm, impact: e.target.value as Impact })}>{IMPACTS.map((i) => <option key={i}>{i}</option>)}</select>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "4px", flex: 1, minWidth: "90px" }}>
+                  <label style={{ fontSize: "10px", fontWeight: 600, color: "#666", textTransform: "uppercase" as const, letterSpacing: "0.05em" }}>Energy</label>
+                  <select style={s.smallSel} value={newForm.energy} onChange={(e) => setNewForm({ ...newForm, energy: e.target.value as Energy })}>{ENERGIES.map((e) => <option key={e}>{e}</option>)}</select>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "4px", flex: 1, minWidth: "120px" }}>
+                  <label style={{ fontSize: "10px", fontWeight: 600, color: "#666", textTransform: "uppercase" as const, letterSpacing: "0.05em" }}>Deadline</label>
+                  <input type="date" style={{ ...s.input, fontSize: "12px" }} value={newForm.deadline ?? ""} onChange={(e) => setNewForm({ ...newForm, deadline: e.target.value || null })} />
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: "8px" }}>
+                <button style={s.btn("#fff", "#1a9e5c", "#1a9e5c")} disabled={saving} onClick={addCommitment}>Add</button>
+                <button style={s.btn("#555", "#f5f5f5", "#e0e0e0")} onClick={() => setShowAdd(false)}>Cancel</button>
               </div>
             </div>
           )}
