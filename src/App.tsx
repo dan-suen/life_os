@@ -10,7 +10,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const AREAS = ["Work / Career", "Health & Fitness", "Personal Projects & Hobbies", "Finances"] as const;
 type Area = typeof AREAS[number];
 
-const TIERS = ["Urgent", "Weekly", "High Priority", "Normal", "Non-Priority"] as const;
+const TIERS = ["Urgent", "Daily", "Weekly", "High Priority", "Normal", "Non-Priority"] as const;
 type Tier = typeof TIERS[number];
 
 const EFFORTS = ["Low", "Medium", "High"] as const;
@@ -24,6 +24,7 @@ type Energy = typeof ENERGIES[number];
 
 const TIER_COLORS: Record<Tier, { bg: string; text: string; border: string }> = {
   "Urgent":           { bg: "#fff0f0", text: "#c0392b", border: "#f5c6c6" },
+  "Daily":            { bg: "#f0faf5", text: "#1a9e5c", border: "#b8e6d0" },
   "Weekly":           { bg: "#f0f4ff", text: "#2253c7", border: "#c6d3f5" },
   "High Priority":    { bg: "#fffbf0", text: "#b07d00", border: "#f5e6c6" },
   "Normal":           { bg: "#f5f5f5", text: "#444444", border: "#dddddd" },
@@ -90,7 +91,7 @@ function urgencyScore(deadline: string | null): number {
 }
 
 function calcPriority(c: Commitment, settings: Settings): number {
-  if (c.tier === "Urgent" || c.tier === "Weekly" || c.tier === "Non-Priority") return 0;
+  if (c.tier === "Urgent" || c.tier === "Daily" || c.tier === "Weekly" || c.tier === "Non-Priority") return 0;
   const { impact, effort, urgency } = settings.weights;
   const energyMult = ENERGY_MATCH[settings.currentEnergy][c.energy];
   const base =
@@ -105,11 +106,17 @@ function shouldRecreateWeekly(c: Commitment): boolean {
   if (c.tier !== "Weekly" || !c.completed || !c.original_deadline) return false;
   const orig = new Date(c.original_deadline);
   const now = new Date();
-  // Find next occurrence on same weekday
   const dayDiff = (orig.getDay() - now.getDay() + 7) % 7;
   const next = new Date(now);
   next.setDate(now.getDate() + (dayDiff === 0 ? 7 : dayDiff));
   return now >= next;
+}
+
+function shouldRecreateDaily(c: Commitment): boolean {
+  if (c.tier !== "Daily" || !c.completed || !c.completed_at) return false;
+  const completedDate = new Date(c.completed_at).toDateString();
+  const today = new Date().toDateString();
+  return completedDate !== today;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -178,7 +185,7 @@ const COL_HEADERS_NO_AREA = ["", "Commitment", "Tier", "Effort", "Impact", "Ener
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function App() {
   const [commitments, setCommitments] = useState<Commitment[]>([]);
-  const [areaFilter, setAreaFilter] = useState<Area | "All">("All");
+  const [areaFilter, setAreaFilter] = useState<Area | "All" | "Today's Focus">("All");
   const [tierFilter, setTierFilter] = useState<Tier | "All">("All");
   const [editing, setEditing] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<Commitment | null>(null);
@@ -215,6 +222,23 @@ export default function App() {
               effort: c.effort, impact: c.impact, energy: c.energy,
               deadline: next, completed: false, completed_at: null,
               original_deadline: c.original_deadline, note: c.note,
+            }]);
+          }
+        }
+        if (shouldRecreateDaily(c)) {
+          const { data: exists } = await supabase
+            .from("commitments")
+            .select("id")
+            .eq("name", c.name)
+            .eq("area", c.area)
+            .eq("tier", "Daily")
+            .eq("completed", false);
+          if (!exists || exists.length === 0) {
+            await supabase.from("commitments").insert([{
+              name: c.name, area: c.area, tier: "Daily",
+              effort: c.effort, impact: c.impact, energy: c.energy,
+              deadline: null, completed: false, completed_at: null,
+              original_deadline: null, note: c.note,
             }]);
           }
         }
@@ -283,7 +307,7 @@ export default function App() {
   }
 
   async function removeAllComplete() {
-    const ids = commitments.filter((c) => c.completed && c.tier !== "Weekly").map((c) => c.id);
+    const ids = commitments.filter((c) => c.completed && c.tier !== "Weekly" && c.tier !== "Daily").map((c) => c.id);
     if (ids.length === 0) return;
     setSaving(true);
     const { error } = await supabase.from("commitments").delete().in("id", ids);
@@ -293,13 +317,21 @@ export default function App() {
   }
 
   // ─── Derived data ──────────────────────────────────────────────────────────
+  const isTodayView = areaFilter === "Today's Focus";
+  const effectiveAreaFilter = isTodayView ? "All" : areaFilter;
+
   const filtered = commitments
-    .filter((c) => areaFilter === "All" || c.area === areaFilter)
+    .filter((c) => effectiveAreaFilter === "All" || c.area === effectiveAreaFilter)
     .filter((c) => tierFilter === "All" || c.tier === tierFilter);
 
   const urgentItems = filtered.filter((c) => c.tier === "Urgent");
 
-  const todoItems = (areaFilter === "All" ? AREAS : [areaFilter]).flatMap((area) => {
+  // Daily + Weekly always appear in full in Today's Focus
+  const dailyItems = commitments.filter((c) => c.tier === "Daily" && !c.completed);
+  const weeklyItems = commitments.filter((c) => c.tier === "Weekly" && !c.completed);
+
+  // Scored items (top N per area)
+  const scoredTodoItems = (effectiveAreaFilter === "All" ? AREAS : [effectiveAreaFilter as Area]).flatMap((area) => {
     const n = settings.topN[area];
     return commitments
       .filter((c) => c.area === area && !c.completed && ["High Priority", "Normal"].includes(c.tier))
@@ -307,7 +339,15 @@ export default function App() {
       .slice(0, n);
   });
 
-  const areasToShow: Area[] = areaFilter === "All" ? [...AREAS] : [areaFilter];
+  // All todo items: daily + weekly + scored
+  const todoItems = [
+    ...dailyItems,
+    ...weeklyItems,
+    ...scoredTodoItems,
+  ];
+
+  const areasToShow: Area[] = effectiveAreaFilter === "All" ? [...AREAS] : [effectiveAreaFilter as Area];
+  const showArea = effectiveAreaFilter === "All";
 
   function getAreaItems(area: Area): Commitment[] {
     return filtered
@@ -316,7 +356,6 @@ export default function App() {
   }
 
   // ─── Row renderer ──────────────────────────────────────────────────────────
-  const showArea = areaFilter === "All";
   const widths = showArea ? COL_WIDTHS : COL_WIDTHS_NO_AREA;
   const headers = showArea ? COL_HEADERS : COL_HEADERS_NO_AREA;
 
@@ -352,7 +391,7 @@ export default function App() {
           {c.deadline ? <span style={{ color: dl.color, fontWeight: dl.color === "#c0392b" ? 600 : 400 }}>{formatDate(c.deadline)}<br /><span style={{ fontSize: "10px" }}>{dl.text}</span></span> : <span style={{ color: "#ccc" }}>—</span>}
         </td>
         <td style={{ ...s.td, fontSize: "12px", fontWeight: 600, color: pri >= 7 ? "#c0392b" : pri >= 4 ? "#b07d00" : "#555" }}>
-          {["Urgent", "Weekly", "Non-Priority"].includes(c.tier) ? <span style={{ color: "#ccc" }}>—</span> : pri}
+          {["Urgent", "Daily", "Weekly", "Non-Priority"].includes(c.tier) ? <span style={{ color: "#ccc" }}>—</span> : pri}
         </td>
         <td style={{ ...s.td, fontSize: "12px", color: "#888", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.note || "—"}</td>
         <td style={s.td}>
@@ -458,9 +497,9 @@ export default function App() {
   }
 
   // ─── Area nav button ───────────────────────────────────────────────────────
-  function AreaBtn({ area }: { area: Area | "All" }) {
+  function AreaBtn({ area }: { area: Area | "All" | "Today's Focus" }) {
     const active = areaFilter === area;
-    const color = area === "All" ? "#1a1a1a" : AREA_COLORS[area];
+    const color = area === "All" ? "#1a1a1a" : area === "Today's Focus" ? "#7c3aed" : AREA_COLORS[area];
     return (
       <button onClick={() => setAreaFilter(area)} style={{
         padding: "8px 16px", borderRadius: "6px 6px 0 0", fontSize: "13px", fontWeight: active ? 700 : 500,
@@ -515,6 +554,7 @@ export default function App() {
         {/* Area nav */}
         <div style={s.navRow}>
           <AreaBtn area="All" />
+          <AreaBtn area="Today's Focus" />
           {AREAS.map((a) => <AreaBtn key={a} area={a} />)}
         </div>
 
@@ -608,50 +648,57 @@ export default function App() {
             </div>
           )}
 
-          {/* Today's Focus — below edit/add panels, above area tables */}
-          {(tierFilter === "All" || tierFilter === "High Priority" || tierFilter === "Normal") && todoItems.length > 0 && (
+          {/* Today's Focus panel — full width in Today's Focus view, collapsible otherwise */}
+          {(isTodayView || (tierFilter === "All" || tierFilter === "High Priority" || tierFilter === "Normal" || tierFilter === "Daily" || tierFilter === "Weekly")) && todoItems.length > 0 && (
             <div style={{ ...s.section, borderColor: "#c6d3f5" }}>
-              <div style={{ ...s.sectionHeader, background: "#f0f4ff", cursor: "pointer" }} onClick={() => setTodoCollapsed(!todoCollapsed)}>
-                <span style={{ ...s.sectionTitle, color: "#2253c7" }}>📋 Today's Focus {todoCollapsed ? "▸" : "▾"}</span>
+              <div style={{ ...s.sectionHeader, background: "#f0f4ff", cursor: isTodayView ? "default" : "pointer" }}
+                onClick={() => !isTodayView && setTodoCollapsed(!todoCollapsed)}>
+                <span style={{ ...s.sectionTitle, color: "#2253c7" }}>
+                  📋 Today's Focus {!isTodayView && (todoCollapsed ? "▸" : "▾")}
+                </span>
                 <span style={{ fontSize: "11px", color: "#2253c7" }}>{todoItems.filter(c => !c.completed).length} remaining</span>
               </div>
-              {!todoCollapsed && (
-                <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: "6px" }}>
-                  {todoItems.map((c) => (
-                    <div key={c.id} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "8px 12px", background: c.completed ? "#f9f9f9" : "#fff", borderRadius: "6px", border: "1px solid #e8eef8" }}>
-                      <input type="checkbox" checked={c.completed} onChange={() => toggleComplete(c)} style={{ flexShrink: 0 }} />
-                      <span style={{ flex: 1, fontWeight: 500, color: c.completed ? "#aaa" : "#1a1a1a", textDecoration: c.completed ? "line-through" : "none", fontSize: "13px" }}>{c.name}</span>
-                      <span style={{ fontSize: "11px", color: AREA_COLORS[c.area], fontWeight: 600, whiteSpace: "nowrap" }}>{c.area}</span>
-                      {c.deadline && <span style={{ fontSize: "11px", color: daysLabel(c.deadline).color, whiteSpace: "nowrap" }}>{daysLabel(c.deadline).text}</span>}
-                      <span style={{ fontSize: "11px", fontWeight: 700, color: "#888" }}>{calcPriority(c, settings)}</span>
-                    </div>
-                  ))}
+              {(isTodayView || !todoCollapsed) && (
+                <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: "4px" }}>
+                  {todoItems.map((c) => {
+                    const tc = TIER_COLORS[c.tier];
+                    return (
+                      <div key={c.id} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "8px 12px", background: c.completed ? "#f9f9f9" : "#fff", borderRadius: "6px", border: "1px solid #e8eef8" }}>
+                        <input type="checkbox" checked={c.completed} onChange={() => toggleComplete(c)} style={{ flexShrink: 0 }} />
+                        <span style={{ display: "inline-block", padding: "1px 7px", borderRadius: "4px", fontSize: "10px", fontWeight: 600, background: tc.bg, color: tc.text, border: `1px solid ${tc.border}`, whiteSpace: "nowrap" }}>{c.tier}</span>
+                        <span style={{ flex: 1, fontWeight: 500, color: c.completed ? "#aaa" : "#1a1a1a", textDecoration: c.completed ? "line-through" : "none", fontSize: "13px" }}>{c.name}</span>
+                        <span style={{ fontSize: "11px", color: AREA_COLORS[c.area], fontWeight: 600, whiteSpace: "nowrap" }}>{c.area}</span>
+                        {c.deadline && <span style={{ fontSize: "11px", color: daysLabel(c.deadline).color, whiteSpace: "nowrap" }}>{daysLabel(c.deadline).text}</span>}
+                        {["High Priority", "Normal"].includes(c.tier) && <span style={{ fontSize: "11px", fontWeight: 700, color: "#888" }}>{calcPriority(c, settings)}</span>}
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
           )}
 
-          {/* Area sections */}
-          {areasToShow.map((area) => {
+          {/* Area sections — hidden in Today's Focus view */}
+          {!isTodayView && areasToShow.map((area) => {
             const items = getAreaItems(area);
-            if (items.length === 0 && !showAdd) return null;
+            if (items.length === 0) return null;
             const areaColor = AREA_COLORS[area];
             const incomplete = items.filter(c => !c.completed).length;
             return (
               <div key={area} style={{ ...s.section, borderTop: `3px solid ${areaColor}` }}>
-                <div style={s.sectionHeader}>
-                  <span style={{ ...s.sectionTitle, color: areaColor }}>{area}</span>
-                  <span style={{ fontSize: "11px", color: "#888" }}>{incomplete} active · {items.filter(c => c.completed).length} complete</span>
-                </div>
+                {/* Only show section header when viewing a single area, not All */}
+                {!showArea && (
+                  <div style={s.sectionHeader}>
+                    <span style={{ ...s.sectionTitle, color: areaColor }}>{area}</span>
+                    <span style={{ fontSize: "11px", color: "#888" }}>{incomplete} active · {items.filter(c => c.completed).length} complete</span>
+                  </div>
+                )}
                 <div style={s.tableWrap}>
                   <table style={s.table}>
                     <colgroup>{widths.map((w, i) => <col key={i} style={{ width: w }} />)}</colgroup>
                     <TableHead />
                     <tbody>
-                      {items.length === 0
-                        ? <tr><td colSpan={headers.length} style={s.emptyRow}>No items in this area</td></tr>
-                        : items.map((c, i) => renderRow(c, i))
-                      }
+                      {items.map((c, i) => renderRow(c, i))}
                     </tbody>
                   </table>
                 </div>
