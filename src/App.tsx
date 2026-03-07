@@ -537,9 +537,6 @@ export default function App() {
       ) : (
         <div style={s.main}>
 
-          {/* Floating edit panel — always visible at top of main when editing */}
-          {renderEditPanel()}
-
           {/* Urgent section — always on top in All Areas view */}
           {(tierFilter === "All" || tierFilter === "Urgent") && urgentItems.length > 0 && (
             <div style={{ ...s.section, borderColor: "#f5c6c6" }}>
@@ -559,30 +556,8 @@ export default function App() {
             </div>
           )}
 
-          {/* Todo panel */}
-          {(tierFilter === "All" || tierFilter === "High Priority" || tierFilter === "Normal") && todoItems.length > 0 && (
-            <div style={{ ...s.section, borderColor: "#c6d3f5" }}>
-              <div style={{ ...s.sectionHeader, background: "#f0f4ff", cursor: "pointer" }} onClick={() => setTodoCollapsed(!todoCollapsed)}>
-                <span style={{ ...s.sectionTitle, color: "#2253c7" }}>📋 Today's Focus {todoCollapsed ? "▸" : "▾"}</span>
-                <span style={{ fontSize: "11px", color: "#2253c7" }}>{todoItems.filter(c => !c.completed).length} remaining</span>
-              </div>
-              {!todoCollapsed && (
-                <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: "6px" }}>
-                  {todoItems.map((c) => (
-                    <div key={c.id} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "8px 12px", background: c.completed ? "#f9f9f9" : "#fff", borderRadius: "6px", border: "1px solid #e8eef8" }}>
-                      <input type="checkbox" checked={c.completed} onChange={() => toggleComplete(c)} style={{ flexShrink: 0 }} />
-                      <span style={{ flex: 1, fontWeight: 500, color: c.completed ? "#aaa" : "#1a1a1a", textDecoration: c.completed ? "line-through" : "none", fontSize: "13px" }}>{c.name}</span>
-                      <span style={{ fontSize: "11px", color: AREA_COLORS[c.area], fontWeight: 600, whiteSpace: "nowrap" }}>{c.area}</span>
-                      {c.deadline && <span style={{ fontSize: "11px", color: daysLabel(c.deadline).color, whiteSpace: "nowrap" }}>{daysLabel(c.deadline).text}</span>}
-                      <span style={{ fontSize: "11px", fontWeight: 700, color: "#888" }}>{calcPriority(c, settings)}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Add panel — same layout as edit panel, no table constraints */}
+          {/* Edit + Add panels — always together, above Today's Focus */}
+          {renderEditPanel()}
           {showAdd && (
             <div style={{ background: "#f0fff4", border: "1px solid #a8e6c0", borderRadius: "8px", padding: "16px", marginBottom: "12px" }}>
               <div style={{ fontSize: "12px", fontWeight: 600, color: "#1a9e5c", marginBottom: "12px" }}>New Commitment</div>
@@ -630,6 +605,29 @@ export default function App() {
                 <button style={s.btn("#fff", "#1a9e5c", "#1a9e5c")} disabled={saving} onClick={addCommitment}>Add</button>
                 <button style={s.btn("#555", "#f5f5f5", "#e0e0e0")} onClick={() => setShowAdd(false)}>Cancel</button>
               </div>
+            </div>
+          )}
+
+          {/* Today's Focus — below edit/add panels, above area tables */}
+          {(tierFilter === "All" || tierFilter === "High Priority" || tierFilter === "Normal") && todoItems.length > 0 && (
+            <div style={{ ...s.section, borderColor: "#c6d3f5" }}>
+              <div style={{ ...s.sectionHeader, background: "#f0f4ff", cursor: "pointer" }} onClick={() => setTodoCollapsed(!todoCollapsed)}>
+                <span style={{ ...s.sectionTitle, color: "#2253c7" }}>📋 Today's Focus {todoCollapsed ? "▸" : "▾"}</span>
+                <span style={{ fontSize: "11px", color: "#2253c7" }}>{todoItems.filter(c => !c.completed).length} remaining</span>
+              </div>
+              {!todoCollapsed && (
+                <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: "6px" }}>
+                  {todoItems.map((c) => (
+                    <div key={c.id} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "8px 12px", background: c.completed ? "#f9f9f9" : "#fff", borderRadius: "6px", border: "1px solid #e8eef8" }}>
+                      <input type="checkbox" checked={c.completed} onChange={() => toggleComplete(c)} style={{ flexShrink: 0 }} />
+                      <span style={{ flex: 1, fontWeight: 500, color: c.completed ? "#aaa" : "#1a1a1a", textDecoration: c.completed ? "line-through" : "none", fontSize: "13px" }}>{c.name}</span>
+                      <span style={{ fontSize: "11px", color: AREA_COLORS[c.area], fontWeight: 600, whiteSpace: "nowrap" }}>{c.area}</span>
+                      {c.deadline && <span style={{ fontSize: "11px", color: daysLabel(c.deadline).color, whiteSpace: "nowrap" }}>{daysLabel(c.deadline).text}</span>}
+                      <span style={{ fontSize: "11px", fontWeight: 700, color: "#888" }}>{calcPriority(c, settings)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
