@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 
 export const s = {
-  app:        { fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif", minHeight: "100vh", background: "#f8f8f8" } as CSSProperties,
+  app:        { fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif", minHeight: "100vh", background: "#f8f8f8", width: "100%" } as CSSProperties,
   header:     { background: "#fff", borderBottom: "1px solid #e5e5e5", padding: "20px 32px 0" } as CSSProperties,
   headerTop:  { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" } as CSSProperties,
   title:      { fontSize: "20px", fontWeight: 700, color: "#1a1a1a", letterSpacing: "-0.02em" } as CSSProperties,

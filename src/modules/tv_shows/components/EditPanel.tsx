@@ -40,7 +40,7 @@ export function EditPanel({ form, saving, onChange, onSave, onCancel }: Props) {
           <div style={{ display: "flex", alignItems: "center", gap: "6px", height: "32px" }}>
             <button style={s.episodeBtn} onClick={() => onChange({ ...form, episode: Math.max(0, form.episode - 1) })}>−</button>
             <span style={{ fontSize: "13px", minWidth: "36px", textAlign: "center" }}>
-              {form.episode > 0 ? `E${form.episode}` : "—"}
+              {form.episode > 0 ? form.episode : "—"}
             </span>
             <button style={s.episodeBtn} onClick={() => onChange({ ...form, episode: form.episode + 1 })}>+</button>
           </div>

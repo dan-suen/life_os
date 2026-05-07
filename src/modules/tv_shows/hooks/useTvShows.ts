@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../../../lib/supabase";
-import type { TvShow } from "../types";
+import type { TvShow, Status } from "../types";
 
 export function useTvShows() {
   const [shows, setShows] = useState<TvShow[]>([]);
@@ -65,6 +65,12 @@ export function useTvShows() {
     }
   }
 
+  async function changeStatus(show: TvShow, status: Status) {
+    const { error: statusError } = await supabase.from("tv_shows").update({ status }).eq("id", show.id);
+    if (statusError) setError(statusError.message);
+    else setShows(p => p.map(s => s.id === show.id ? { ...s, status } : s));
+  }
+
   async function importShows(newShows: Omit<TvShow, "id">[]): Promise<boolean> {
     setSaving(true);
     const { data, error: importError } = await supabase.from("tv_shows").insert(newShows).select();
@@ -74,5 +80,16 @@ export function useTvShows() {
     return true;
   }
 
-  return { shows, loading, saving, error, setError, add, update, remove, toggleCaughtUp, adjustEpisode, importShows };
+  async function overwriteShows(newShows: Omit<TvShow, "id">[]): Promise<boolean> {
+    setSaving(true);
+    const { error: delError } = await supabase.from("tv_shows").delete().neq("id", 0);
+    if (delError) { setError(delError.message); setSaving(false); return false; }
+    const { data, error: insertError } = await supabase.from("tv_shows").insert(newShows).select();
+    if (insertError) { setError(insertError.message); setSaving(false); return false; }
+    setShows((data as TvShow[]).sort((a, b) => a.name.localeCompare(b.name)));
+    setSaving(false);
+    return true;
+  }
+
+  return { shows, loading, saving, error, setError, add, update, remove, toggleCaughtUp, adjustEpisode, changeStatus, importShows, overwriteShows };
 }
