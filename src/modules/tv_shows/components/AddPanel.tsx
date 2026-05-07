@@ -1,6 +1,6 @@
 import { useState } from "react";
-import type { TvShow, Day, Status } from "../types";
-import { DAYS, STATUSES, defaultShowForm } from "../types";
+import type { TvShow, Day, Status, MediaType } from "../types";
+import { DAYS, STATUSES, MEDIA_TYPES, defaultShowForm } from "../types";
 import { s } from "../styles";
 
 interface Props {
@@ -35,6 +35,17 @@ export function AddPanel({ defaultDay, saving, onAdd, onCancel }: Props) {
           <select style={s.smallSel} value={form.status} onChange={e => setForm({ ...form, status: e.target.value as Status })}>
             {STATUSES.map(st => <option key={st}>{st}</option>)}
           </select>
+        </div>
+        <div style={fieldStyle}>
+          <label style={s.label}>Type</label>
+          <select style={s.smallSel} value={form.type} onChange={e => setForm({ ...form, type: e.target.value as MediaType })}>
+            {MEDIA_TYPES.map(t => <option key={t}>{t}</option>)}
+          </select>
+        </div>
+        <div style={{ ...fieldStyle, flex: 3, minWidth: "200px" }}>
+          <label style={s.label}>URL</label>
+          <input style={s.input} placeholder="https://…" value={form.url ?? ""}
+            onChange={e => setForm({ ...form, url: e.target.value || null })} />
         </div>
       </div>
       <div style={{ display: "flex", gap: "8px" }}>

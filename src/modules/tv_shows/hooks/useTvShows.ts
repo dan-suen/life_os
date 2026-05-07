@@ -32,7 +32,7 @@ export function useTvShows() {
     setSaving(true);
     const { error: updateError } = await supabase.from("tv_shows").update({
       name: show.name, air_day: show.air_day, episode: show.episode,
-      caught_up: show.caught_up, status: show.status,
+      caught_up: show.caught_up, status: show.status, type: show.type, url: show.url,
     }).eq("id", show.id);
     if (updateError) { setError(updateError.message); setSaving(false); return false; }
     setShows(p => p.map(s => s.id === show.id ? show : s));

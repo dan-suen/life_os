@@ -1,5 +1,5 @@
-import type { TvShow, Day, Status } from "../types";
-import { DAYS, STATUSES } from "../types";
+import type { TvShow, Day, Status, MediaType } from "../types";
+import { DAYS, STATUSES, MEDIA_TYPES } from "../types";
 import { s } from "../styles";
 
 interface Props {
@@ -46,10 +46,23 @@ export function EditPanel({ form, saving, onChange, onSave, onCancel }: Props) {
           </div>
         </div>
         <div style={fieldStyle}>
+          <label style={s.label}>Type</label>
+          <select style={s.smallSel} value={form.type} onChange={e => onChange({ ...form, type: e.target.value as MediaType })}>
+            {MEDIA_TYPES.map(t => <option key={t}>{t}</option>)}
+          </select>
+        </div>
+        <div style={fieldStyle}>
           <label style={s.label}>Caught Up</label>
           <div style={{ display: "flex", alignItems: "center", height: "32px" }}>
             <input type="checkbox" checked={form.caught_up} onChange={() => onChange({ ...form, caught_up: !form.caught_up })} />
           </div>
+        </div>
+      </div>
+      <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginBottom: "12px" }}>
+        <div style={{ ...fieldStyle, flex: 1, minWidth: "200px" }}>
+          <label style={s.label}>URL</label>
+          <input style={s.input} placeholder="https://…" value={form.url ?? ""}
+            onChange={e => onChange({ ...form, url: e.target.value || null })} />
         </div>
       </div>
       <div style={{ display: "flex", gap: "8px" }}>
