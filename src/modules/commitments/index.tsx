@@ -130,7 +130,7 @@ export default function CommitmentsModule() {
           {showTodoPanel && todoItems.length > 0 && (
             <TodaysFocusPanel items={todoItems} settings={settings} isTodayView={isTodayView}
               collapsed={todoCollapsed} onToggleCollapse={() => setTodoCollapsed(!todoCollapsed)}
-              onToggleComplete={toggleComplete} />
+              onToggleComplete={toggleComplete} onEdit={handleEdit} onDelete={remove} />
           )}
 
           {!isTodayView && areasToShow.map(area => {

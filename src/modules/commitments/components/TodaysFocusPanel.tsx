@@ -11,9 +11,11 @@ interface Props {
   collapsed: boolean;
   onToggleCollapse: () => void;
   onToggleComplete: (c: Commitment) => void;
+  onEdit: (c: Commitment) => void;
+  onDelete: (id: number) => void;
 }
 
-export function TodaysFocusPanel({ items, settings, isTodayView, collapsed, onToggleCollapse, onToggleComplete }: Props) {
+export function TodaysFocusPanel({ items, settings, isTodayView, collapsed, onToggleCollapse, onToggleComplete, onEdit, onDelete }: Props) {
   return (
     <div style={{ ...s.section, borderColor: "#c6d3f5" }}>
       <div style={{ ...s.sectionHeader, background: "#f0f4ff", cursor: isTodayView ? "default" : "pointer" }}
@@ -36,6 +38,10 @@ export function TodaysFocusPanel({ items, settings, isTodayView, collapsed, onTo
                 <span style={{ fontSize: "11px", color: AREA_COLORS[c.area], fontWeight: 600, whiteSpace: "nowrap" }}>{c.area}</span>
                 {c.deadline && <span style={{ fontSize: "11px", color: dl.color, whiteSpace: "nowrap" }}>{dl.text}</span>}
                 {["High Priority", "Normal"].includes(c.tier) && <span style={{ fontSize: "11px", fontWeight: 700, color: "#888" }}>{calcPriority(c, settings)}</span>}
+                <div style={{ display: "flex", gap: "2px", marginLeft: "auto", flexShrink: 0 }}>
+                  <button style={s.iconBtn} title="Edit" onClick={() => onEdit(c)}>✎</button>
+                  <button style={{ ...s.iconBtn, color: "#e74c3c" }} title="Delete" onClick={() => onDelete(c.id)}>✕</button>
+                </div>
               </div>
             );
           })}

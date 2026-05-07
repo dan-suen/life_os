@@ -33,7 +33,7 @@ export const s = {
   formGroup:     { marginBottom: "16px" } as CSSProperties,
 };
 
-export const COL_WIDTHS        = ["3%", "26%", "10%", "9%", "8%", "8%", "8%", "9%", "7%", "8%", "4%"];
-export const COL_HEADERS       = ["", "Commitment", "Tier", "Area", "Effort", "Impact", "Energy", "Deadline", "Priority", "Note", ""];
-export const COL_WIDTHS_NO_AREA  = ["3%", "30%", "11%", "10%", "9%", "9%", "10%", "8%", "9%", "1%"];
+export const COL_WIDTHS          = ["3%", "22%", "10%", "9%", "8%", "8%", "8%", "9%", "7%", "9%", "7%"];
+export const COL_HEADERS         = ["", "Commitment", "Tier", "Area", "Effort", "Impact", "Energy", "Deadline", "Priority", "Note", ""];
+export const COL_WIDTHS_NO_AREA  = ["3%", "25%", "11%", "10%", "9%", "9%", "10%", "8%", "9%", "6%"];
 export const COL_HEADERS_NO_AREA = ["", "Commitment", "Tier", "Effort", "Impact", "Energy", "Deadline", "Priority", "Note", ""];

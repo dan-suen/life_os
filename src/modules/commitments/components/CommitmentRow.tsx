@@ -51,7 +51,7 @@ export function CommitmentRow({ commitment: c, index: i, showArea, isEditing, se
         {["Urgent", "Daily", "Weekly", "Non-Priority"].includes(c.tier) ? <span style={{ color: "#ccc" }}>—</span> : pri}
       </td>
       <td style={{ ...s.td, fontSize: "12px", color: "#888", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.note || "—"}</td>
-      <td style={s.td}>
+      <td style={{ ...s.td, overflow: "visible" }}>
         <div style={{ display: "flex", gap: "2px" }}>
           <button style={s.iconBtn} title="Edit" onClick={() => onEdit(c)}>✎</button>
           <button style={{ ...s.iconBtn, color: "#e74c3c" }} title="Delete" onClick={() => onDelete(c.id)}>✕</button>
