@@ -5,13 +5,14 @@ import { s } from "../styles";
 
 interface Props {
   saving: boolean;
-  onImport: (shows: Omit<TvShow, "id">[]) => void;
+  onImport: (shows: Omit<TvShow, "id">[], overwrite: boolean) => void;
   onCancel: () => void;
 }
 
 export function ImportPanel({ saving, onImport, onCancel }: Props) {
   const [parsed, setParsed] = useState<Omit<TvShow, "id">[] | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
+  const [overwrite, setOverwrite] = useState(false);
 
   function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -49,9 +50,22 @@ export function ImportPanel({ saving, onImport, onCancel }: Props) {
           <p style={{ fontSize: "12px", color: "#555", margin: "0 0 12px" }}>
             Found <strong>{parsed.length}</strong> shows ready to import.
           </p>
+          <div style={{ display: "flex", gap: "16px", marginBottom: "12px" }}>
+            <label style={{ fontSize: "12px", color: "#555", display: "flex", alignItems: "center", gap: "6px", cursor: "pointer" }}>
+              <input type="radio" checked={!overwrite} onChange={() => setOverwrite(false)} /> Append to existing
+            </label>
+            <label style={{ fontSize: "12px", color: overwrite ? "#c0392b" : "#555", display: "flex", alignItems: "center", gap: "6px", cursor: "pointer" }}>
+              <input type="radio" checked={overwrite} onChange={() => setOverwrite(true)} /> Overwrite all
+            </label>
+          </div>
+          {overwrite && (
+            <div style={{ fontSize: "12px", color: "#c0392b", background: "#fff0f0", border: "1px solid #f5c6c6", borderRadius: "4px", padding: "8px 10px", marginBottom: "12px" }}>
+              ⚠ This will delete all existing shows before importing.
+            </div>
+          )}
           <div style={{ display: "flex", gap: "8px" }}>
-            <button style={s.btn("#fff", "#2253c7", "#2253c7")} disabled={saving} onClick={() => onImport(parsed)}>
-              Import {parsed.length} shows
+            <button style={s.btn("#fff", overwrite ? "#c0392b" : "#2253c7", overwrite ? "#c0392b" : "#2253c7")} disabled={saving} onClick={() => onImport(parsed, overwrite)}>
+              {overwrite ? "Overwrite" : "Append"} {parsed.length} shows
             </button>
             <button style={s.btn("#555", "#f5f5f5", "#e0e0e0")} onClick={() => setParsed(null)}>Back</button>
             <button style={s.btn("#555", "#f5f5f5", "#e0e0e0")} onClick={onCancel}>Cancel</button>

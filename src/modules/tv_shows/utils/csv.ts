@@ -36,6 +36,8 @@ export function parseShowsFromCSV(text: string): Omit<TvShow, "id">[] {
       episode: parseInt(col_d) || 0,
       caught_up: col_c?.toUpperCase() === "TRUE",
       status: "Watching",
+      type: "Series",
+      url: null,
     });
   }
 

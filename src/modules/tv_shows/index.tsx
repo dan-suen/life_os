@@ -9,7 +9,7 @@ import { EditPanel } from "./components/EditPanel";
 import { ImportPanel } from "./components/ImportPanel";
 
 export default function TvShowsModule() {
-  const { shows, loading, saving, error, setError, add, update, remove, toggleCaughtUp, adjustEpisode, importShows } = useTvShows();
+  const { shows, loading, saving, error, setError, add, update, remove, toggleCaughtUp, adjustEpisode, changeStatus, importShows, overwriteShows } = useTvShows();
 
   const [activeDay, setActiveDay] = useState<Day>(TODAY_DAY);
   const [showAdd, setShowAdd] = useState(false);
@@ -30,8 +30,8 @@ export default function TvShowsModule() {
     if (ok) setEditing(null);
   }
 
-  async function handleImport(newShows: Omit<TvShow, "id">[]) {
-    const ok = await importShows(newShows);
+  async function handleImport(newShows: Omit<TvShow, "id">[], overwrite: boolean) {
+    const ok = await (overwrite ? overwriteShows(newShows) : importShows(newShows));
     if (ok) setShowImport(false);
   }
 
@@ -91,6 +91,7 @@ export default function TvShowsModule() {
                 <ShowRow key={show.id} show={show}
                   onToggleCaughtUp={toggleCaughtUp}
                   onAdjustEpisode={adjustEpisode}
+                  onChangeStatus={changeStatus}
                   onEdit={setEditing}
                   onDelete={remove}
                 />
