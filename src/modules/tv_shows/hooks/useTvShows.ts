@@ -66,9 +66,12 @@ export function useTvShows() {
   }
 
   async function changeStatus(show: TvShow, status: Status) {
+    setShows(p => p.map(s => s.id === show.id ? { ...s, status } : s));
     const { error: statusError } = await supabase.from("tv_shows").update({ status }).eq("id", show.id);
-    if (statusError) setError(statusError.message);
-    else setShows(p => p.map(s => s.id === show.id ? { ...s, status } : s));
+    if (statusError) {
+      setError(statusError.message);
+      setShows(p => p.map(s => s.id === show.id ? show : s));
+    }
   }
 
   async function importShows(newShows: Omit<TvShow, "id">[]): Promise<boolean> {

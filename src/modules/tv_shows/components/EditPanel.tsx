@@ -1,6 +1,8 @@
+import { useState } from "react";
 import type { TvShow, Day, Status, MediaType } from "../types";
 import { DAYS, STATUSES, MEDIA_TYPES } from "../types";
 import { s } from "../styles";
+import { fetchMalByUrl, searchMalByName } from "../utils/mal";
 
 interface Props {
   form: TvShow;
@@ -11,17 +13,46 @@ interface Props {
 }
 
 export function EditPanel({ form, saving, onChange, onSave, onCancel }: Props) {
+  const [fetching, setFetching] = useState(false);
   const fieldStyle = { display: "flex", flexDirection: "column" as const, gap: "4px", flex: 1, minWidth: "100px" };
+
+  async function handleUrlChange(url: string) {
+    onChange({ ...form, url: url || null });
+    if (!url.includes("myanimelist.net/anime/")) return;
+    setFetching(true);
+    const info = await fetchMalByUrl(url);
+    setFetching(false);
+    if (info) onChange({ ...form, name: info.name, type: info.type, status: info.status, url });
+  }
+
+  async function handleFetchByName() {
+    if (!form.name.trim()) return;
+    setFetching(true);
+    const info = await searchMalByName(form.name);
+    setFetching(false);
+    if (info) onChange({ ...form, name: info.name, type: info.type, status: info.status, url: info.url });
+  }
+
+  const showFetchBtn = !fetching && form.name.trim() !== "" && !form.url;
 
   return (
     <div style={{ background: "#fffbea", border: "1px solid #f0c040", borderRadius: "8px", padding: "16px", marginBottom: "12px" }}>
-      <div style={{ fontSize: "12px", fontWeight: 600, color: "#b07d00", marginBottom: "12px" }}>Editing show</div>
+      <div style={{ fontSize: "12px", fontWeight: 600, color: "#b07d00", marginBottom: "12px" }}>
+        Editing show {fetching && <span style={{ fontWeight: 400, color: "#888" }}>— fetching from MAL…</span>}
+      </div>
       <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginBottom: "12px" }}>
         <div style={{ ...fieldStyle, flex: 3, minWidth: "200px" }}>
           <label style={s.label}>Name</label>
-          <input autoFocus style={s.input} value={form.name}
-            onChange={e => onChange({ ...form, name: e.target.value })}
-            onKeyDown={e => { if (e.key === "Enter") onSave(); if (e.key === "Escape") onCancel(); }} />
+          <div style={{ display: "flex", gap: "6px" }}>
+            <input autoFocus style={s.input} value={form.name}
+              onChange={e => onChange({ ...form, name: e.target.value })}
+              onKeyDown={e => { if (e.key === "Enter") onSave(); if (e.key === "Escape") onCancel(); }} />
+            {showFetchBtn && (
+              <button style={{ ...s.btn("#2253c7", "#f0f4ff", "#c6d3f5"), whiteSpace: "nowrap" }} onClick={handleFetchByName}>
+                ↓ MAL
+              </button>
+            )}
+          </div>
         </div>
         <div style={fieldStyle}>
           <label style={s.label}>Air Day</label>
@@ -61,12 +92,12 @@ export function EditPanel({ form, saving, onChange, onSave, onCancel }: Props) {
       <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginBottom: "12px" }}>
         <div style={{ ...fieldStyle, flex: 1, minWidth: "200px" }}>
           <label style={s.label}>URL</label>
-          <input style={s.input} placeholder="https://…" value={form.url ?? ""}
-            onChange={e => onChange({ ...form, url: e.target.value || null })} />
+          <input style={s.input} placeholder="https://myanimelist.net/anime/…" value={form.url ?? ""}
+            onChange={e => handleUrlChange(e.target.value)} />
         </div>
       </div>
       <div style={{ display: "flex", gap: "8px" }}>
-        <button style={s.btn("#fff", "#1a9e5c", "#1a9e5c")} disabled={saving} onClick={onSave}>Save</button>
+        <button style={s.btn("#fff", "#1a9e5c", "#1a9e5c")} disabled={saving || fetching} onClick={onSave}>Save</button>
         <button style={s.btn("#555", "#f5f5f5", "#e0e0e0")} onClick={onCancel}>Cancel</button>
       </div>
     </div>
