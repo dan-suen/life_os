@@ -22,7 +22,7 @@ export function AddPanel({ defaultDay, saving, onAdd, onCancel }: Props) {
     setFetching(true);
     const info = await fetchMalByUrl(url);
     setFetching(false);
-    if (info) setForm(f => ({ ...f, name: info.name, type: info.type, status: info.status, url }));
+    if (info) setForm(f => ({ ...f, name: info.name, type: info.type, status: info.status, url, poster: info.poster }));
   }
 
   async function handleFetchByName() {
@@ -30,10 +30,10 @@ export function AddPanel({ defaultDay, saving, onAdd, onCancel }: Props) {
     setFetching(true);
     const info = await searchMalByName(form.name);
     setFetching(false);
-    if (info) setForm(f => ({ ...f, name: info.name, type: info.type, status: info.status, url: info.url }));
+    if (info) setForm(f => ({ ...f, name: info.name, type: info.type, status: info.status, url: info.url, poster: info.poster }));
   }
 
-  const showFetchBtn = !fetching && form.name.trim() !== "" && !form.url;
+  const showFetchBtn = !fetching && form.name.trim() !== "";
 
   return (
     <div style={{ background: "#f0fff4", border: "1px solid #a8e6c0", borderRadius: "8px", padding: "16px", marginBottom: "12px" }}>

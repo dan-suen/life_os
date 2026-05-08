@@ -16,6 +16,7 @@ export interface TvShow {
   status: Status;
   type: MediaType;
   url: string | null;
+  poster: string | null;
 }
 
 export const DAY_MAP: Record<string, Day> = {
@@ -26,5 +27,5 @@ export const DAY_MAP: Record<string, Day> = {
 export const TODAY_DAY = (["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const)[new Date().getDay()];
 
 export const defaultShowForm = (day: Day): Omit<TvShow, "id"> => ({
-  name: "", air_day: day, episode: 0, caught_up: false, status: "Watching", type: "Series", url: null,
+  name: "", air_day: day, episode: 0, caught_up: false, status: "Watching", type: "Series", url: null, poster: null,
 });

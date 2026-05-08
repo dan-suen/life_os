@@ -38,6 +38,7 @@ export function parseShowsFromCSV(text: string): Omit<TvShow, "id">[] {
       status: "Watching",
       type: "Series",
       url: null,
+      poster: null,
     });
   }
 

@@ -22,6 +22,17 @@ export interface MalInfo {
   type: MediaType;
   status: Status;
   url: string;
+  poster: string | null;
+}
+
+function infoFromData(data: Record<string, any>, url: string): MalInfo {
+  return {
+    name: formatName(data.title_english, data.title),
+    type: typeFromMal(data.type),
+    status: statusFromMal(data.status),
+    url,
+    poster: data.images?.jpg?.large_image_url ?? null,
+  };
 }
 
 export async function fetchMalByUrl(url: string): Promise<MalInfo | null> {
@@ -31,12 +42,7 @@ export async function fetchMalByUrl(url: string): Promise<MalInfo | null> {
     const res = await fetch(`https://api.jikan.moe/v4/anime/${match[1]}`);
     if (!res.ok) return null;
     const { data } = await res.json();
-    return {
-      name: formatName(data.title_english, data.title),
-      type: typeFromMal(data.type),
-      status: statusFromMal(data.status),
-      url,
-    };
+    return infoFromData(data, url);
   } catch { return null; }
 }
 
@@ -46,12 +52,6 @@ export async function searchMalByName(query: string): Promise<MalInfo | null> {
     if (!res.ok) return null;
     const { data } = await res.json();
     if (!data?.length) return null;
-    const item = data[0];
-    return {
-      name: formatName(item.title_english, item.title),
-      type: typeFromMal(item.type),
-      status: statusFromMal(item.status),
-      url: item.url,
-    };
+    return infoFromData(data[0], data[0].url);
   } catch { return null; }
 }

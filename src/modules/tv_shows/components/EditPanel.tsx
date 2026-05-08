@@ -22,7 +22,7 @@ export function EditPanel({ form, saving, onChange, onSave, onCancel }: Props) {
     setFetching(true);
     const info = await fetchMalByUrl(url);
     setFetching(false);
-    if (info) onChange({ ...form, name: info.name, type: info.type, status: info.status, url });
+    if (info) onChange({ ...form, name: info.name, type: info.type, status: info.status, url, poster: info.poster });
   }
 
   async function handleFetchByName() {
@@ -30,10 +30,10 @@ export function EditPanel({ form, saving, onChange, onSave, onCancel }: Props) {
     setFetching(true);
     const info = await searchMalByName(form.name);
     setFetching(false);
-    if (info) onChange({ ...form, name: info.name, type: info.type, status: info.status, url: info.url });
+    if (info) onChange({ ...form, name: info.name, type: info.type, status: info.status, url: info.url, poster: info.poster });
   }
 
-  const showFetchBtn = !fetching && form.name.trim() !== "" && !form.url;
+  const showFetchBtn = !fetching && form.name.trim() !== "";
 
   return (
     <div style={{ background: "#fffbea", border: "1px solid #f0c040", borderRadius: "8px", padding: "16px", marginBottom: "12px" }}>
