@@ -1,12 +1,14 @@
 import { useState } from "react";
 import CommitmentsModule from "./modules/commitments";
 import TvShowsModule from "./modules/tv_shows";
+import GbfGridModule from "./modules/gbf_grid";
 
-type ModuleId = "commitments" | "tv";
+type ModuleId = "commitments" | "tv" | "gbf";
 
 const MODULES: { id: ModuleId; label: string }[] = [
   { id: "commitments", label: "Commitments" },
   { id: "tv", label: "TV Shows" },
+  { id: "gbf", label: "GBF Grid" },
 ];
 
 export default function App() {
@@ -24,7 +26,9 @@ export default function App() {
           }}>{m.label}</button>
         ))}
       </nav>
-      {active === "commitments" ? <CommitmentsModule /> : <TvShowsModule />}
+      {active === "commitments" ? <CommitmentsModule /> :
+       active === "tv" ? <TvShowsModule /> :
+       <GbfGridModule />}
     </div>
   );
 }
