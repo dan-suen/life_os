@@ -22,11 +22,11 @@ export default function GbfGridModule() {
   const totalDone = WEAPONS.filter(w => w.element === activeElement && isChecked(activeElement, w.name)).length;
   const totalAll = WEAPONS.filter(w => w.element === activeElement).length;
 
-  // Sources that still have unchecked weapons in the current tab
+  // Sources that still have unchecked weapons across all categories for this element
   const incompleteSources = Array.from(
     new Set(
-      weapons
-        .filter(w => w.source && !isChecked(activeElement, w.name))
+      WEAPONS
+        .filter(w => w.element === activeElement && w.source && !isChecked(activeElement, w.name))
         .map(w => w.source)
     )
   ).sort();
@@ -55,12 +55,31 @@ export default function GbfGridModule() {
 
       {/* Category tabs + title */}
       <div style={{ background: "#fff", borderBottom: "1px solid #e5e5e5", padding: "16px 32px 0" }}>
-        <div style={{ display: "flex", alignItems: "baseline", gap: "12px", marginBottom: "12px" }}>
+        <div style={{ display: "flex", alignItems: "baseline", gap: "12px", marginBottom: "10px" }}>
           <span style={{ fontSize: "17px", fontWeight: 700, letterSpacing: "-0.02em", color: meta.color }}>
             {activeElement} · {meta.boss}
           </span>
           <span style={{ fontSize: "13px", color: "#888" }}>{totalDone}/{totalAll} obtained</span>
         </div>
+        {!loading && incompleteSources.length > 0 && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "12px" }}>
+            {incompleteSources.map(src => {
+              const s = SOURCE_COLORS[src];
+              const remaining = WEAPONS.filter(w => w.element === activeElement && w.source === src && !isChecked(activeElement, w.name)).length;
+              return (
+                <span key={src} style={{
+                  display: "inline-flex", alignItems: "center", gap: "5px",
+                  padding: "3px 10px", borderRadius: "99px", fontSize: "12px", fontWeight: 600,
+                  background: s?.bg ?? "#f0f0f0", color: s?.color ?? "#555",
+                  border: `1px solid ${s?.color ?? "#ccc"}40`,
+                }}>
+                  {src}
+                  <span style={{ fontWeight: 400, opacity: 0.7 }}>{remaining}</span>
+                </span>
+              );
+            })}
+          </div>
+        )}
         <div style={{ display: "flex", gap: "4px" }}>
           {CATEGORIES.map(cat => {
             const total = WEAPONS.filter(w => w.element === activeElement && w.category === cat).length;
@@ -89,25 +108,6 @@ export default function GbfGridModule() {
       )}
 
       <div style={{ flex: 1, padding: "24px 32px" }}>
-        {!loading && incompleteSources.length > 0 && (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "16px" }}>
-            {incompleteSources.map(src => {
-              const s = SOURCE_COLORS[src];
-              const remaining = weapons.filter(w => w.source === src && !isChecked(activeElement, w.name)).length;
-              return (
-                <span key={src} style={{
-                  display: "inline-flex", alignItems: "center", gap: "5px",
-                  padding: "4px 10px", borderRadius: "99px", fontSize: "12px", fontWeight: 600,
-                  background: s?.bg ?? "#f0f0f0", color: s?.color ?? "#555",
-                  border: `1px solid ${s?.color ?? "#ccc"}30`,
-                }}>
-                  {src}
-                  <span style={{ fontWeight: 400, opacity: 0.75 }}>{remaining}</span>
-                </span>
-              );
-            })}
-          </div>
-        )}
         {loading ? (
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "40vh", color: "#aaa" }}>Loading…</div>
         ) : (
