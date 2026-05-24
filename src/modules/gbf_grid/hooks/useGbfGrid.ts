@@ -18,12 +18,14 @@ export function useGbfGrid() {
     load();
   }, []);
 
-  async function toggle(name: string) {
-    const isChecked = checked.has(name);
-    // Optimistic update
+  // key format: "{element}:{weaponName}" to disambiguate shared names like "Bahamut Weapons"
+  async function toggle(element: string, name: string) {
+    const key = `${element}:${name}`;
+    const isChecked = checked.has(key);
+
     setChecked(prev => {
       const next = new Set(prev);
-      isChecked ? next.delete(name) : next.add(name);
+      isChecked ? next.delete(key) : next.add(key);
       return next;
     });
 
@@ -31,21 +33,25 @@ export function useGbfGrid() {
       const { error: err } = await supabase
         .from("gbf_grid_checked")
         .delete()
-        .eq("weapon_name", name);
+        .eq("weapon_name", key);
       if (err) {
         setError(err.message);
-        setChecked(prev => { const next = new Set(prev); next.add(name); return next; });
+        setChecked(prev => { const next = new Set(prev); next.add(key); return next; });
       }
     } else {
       const { error: err } = await supabase
         .from("gbf_grid_checked")
-        .insert({ weapon_name: name });
+        .insert({ weapon_name: key });
       if (err) {
         setError(err.message);
-        setChecked(prev => { const next = new Set(prev); next.delete(name); return next; });
+        setChecked(prev => { const next = new Set(prev); next.delete(key); return next; });
       }
     }
   }
 
-  return { checked, loading, error, setError, toggle };
+  function isChecked(element: string, name: string) {
+    return checked.has(`${element}:${name}`);
+  }
+
+  return { isChecked, loading, error, setError, toggle };
 }

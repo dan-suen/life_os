@@ -1,8 +1,6 @@
 import { useState } from "react";
-import { WEAPONS, type Category } from "./data";
+import { WEAPONS, ELEMENTS, CATEGORIES, ELEMENT_META, type Element, type Category } from "./data";
 import { useGbfGrid } from "./hooks/useGbfGrid";
-
-const CATEGORIES: Category[] = ["Core", "Additional", "Niche"];
 
 const SOURCE_COLORS: Record<string, { bg: string; color: string }> = {
   "Omega Rebirth": { bg: "#fff0e0", color: "#b85c00" },
@@ -12,33 +10,60 @@ const SOURCE_COLORS: Record<string, { bg: string; color: string }> = {
 };
 
 export default function GbfGridModule() {
+  const [activeElement, setActiveElement] = useState<Element>("Fire");
   const [activeCategory, setActiveCategory] = useState<Category>("Core");
-  const { checked, loading, error, setError, toggle } = useGbfGrid();
+  const { isChecked, loading, error, setError, toggle } = useGbfGrid();
 
-  const weapons = WEAPONS.filter(w => w.category === activeCategory);
-  const doneCount = weapons.filter(w => checked.has(w.name)).length;
+  const meta = ELEMENT_META[activeElement];
+  const weapons = WEAPONS.filter(w => w.element === activeElement && w.category === activeCategory);
+  const doneInView = weapons.filter(w => isChecked(activeElement, w.name)).length;
+  const totalDone = WEAPONS.filter(w => w.element === activeElement && isChecked(activeElement, w.name)).length;
+  const totalAll = WEAPONS.filter(w => w.element === activeElement).length;
 
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "#f9f9f9" }}>
-      <div style={{ background: "#fff", borderBottom: "1px solid #e5e5e5", padding: "20px 32px 0" }}>
-        <div style={{ display: "flex", alignItems: "baseline", gap: "12px", marginBottom: "16px" }}>
-          <span style={{ fontSize: "18px", fontWeight: 700, letterSpacing: "-0.02em" }}>Fire Grid · Colossus</span>
-          <span style={{ fontSize: "13px", color: "#888" }}>{doneCount}/{weapons.length} in {activeCategory}</span>
+      {/* Element tabs */}
+      <div style={{ background: "#1a1a1a", padding: "0 32px", display: "flex", gap: "2px" }}>
+        {ELEMENTS.map(el => {
+          const m = ELEMENT_META[el];
+          const isActive = el === activeElement;
+          return (
+            <button key={el} onClick={() => setActiveElement(el)} style={{
+              padding: "10px 18px", border: "none", cursor: "pointer", fontSize: "13px",
+              background: isActive ? m.bg : "transparent",
+              color: isActive ? m.color : "#888",
+              fontWeight: isActive ? 700 : 400,
+              borderRadius: "6px 6px 0 0",
+              transition: "all 0.1s",
+            }}>
+              {el}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Category tabs + title */}
+      <div style={{ background: "#fff", borderBottom: "1px solid #e5e5e5", padding: "16px 32px 0" }}>
+        <div style={{ display: "flex", alignItems: "baseline", gap: "12px", marginBottom: "12px" }}>
+          <span style={{ fontSize: "17px", fontWeight: 700, letterSpacing: "-0.02em", color: meta.color }}>
+            {activeElement} · {meta.boss}
+          </span>
+          <span style={{ fontSize: "13px", color: "#888" }}>{totalDone}/{totalAll} obtained</span>
         </div>
         <div style={{ display: "flex", gap: "4px" }}>
           {CATEGORIES.map(cat => {
-            const total = WEAPONS.filter(w => w.category === cat).length;
-            const done = WEAPONS.filter(w => w.category === cat && checked.has(w.name)).length;
+            const total = WEAPONS.filter(w => w.element === activeElement && w.category === cat).length;
+            const done = WEAPONS.filter(w => w.element === activeElement && w.category === cat && isChecked(activeElement, w.name)).length;
             const isActive = cat === activeCategory;
             return (
               <button key={cat} onClick={() => setActiveCategory(cat)} style={{
                 padding: "8px 16px", border: "1px solid #e5e5e5",
-                borderBottom: isActive ? "2px solid #1a1a1a" : "1px solid #e5e5e5",
+                borderBottom: isActive ? `2px solid ${meta.color}` : "1px solid #e5e5e5",
                 borderRadius: "6px 6px 0 0", background: isActive ? "#fff" : "#f5f5f5",
-                color: isActive ? "#1a1a1a" : "#666", fontWeight: isActive ? 700 : 400,
+                color: isActive ? meta.color : "#666", fontWeight: isActive ? 700 : 400,
                 fontSize: "13px", cursor: "pointer", transition: "all 0.1s",
               }}>
-                {cat} <span style={{ fontSize: "11px", color: isActive ? "#555" : "#aaa" }}>({done}/{total})</span>
+                {cat} <span style={{ fontSize: "11px", color: isActive ? meta.color : "#aaa", opacity: 0.8 }}>({done}/{total})</span>
               </button>
             );
           })}
@@ -47,7 +72,8 @@ export default function GbfGridModule() {
 
       {error && (
         <div style={{ background: "#fff0f0", color: "#c0392b", padding: "10px 32px", fontSize: "12px", borderBottom: "1px solid #f5c6c6" }}>
-          ⚠ {error} <span style={{ cursor: "pointer", textDecoration: "underline", marginLeft: "8px" }} onClick={() => setError(null)}>dismiss</span>
+          ⚠ {error}{" "}
+          <span style={{ cursor: "pointer", textDecoration: "underline", marginLeft: "8px" }} onClick={() => setError(null)}>dismiss</span>
         </div>
       )}
 
@@ -61,23 +87,23 @@ export default function GbfGridModule() {
                 <th style={thStyle("40px")}>✓</th>
                 <th style={thStyle()}>Weapon</th>
                 <th style={thStyle("80px")}>Rank</th>
-                <th style={thStyle("90px")}>Copies</th>
-                <th style={thStyle("150px")}>Source</th>
+                <th style={thStyle("100px")}>Copies</th>
+                <th style={thStyle("140px")}>Source</th>
               </tr>
             </thead>
             <tbody>
               {weapons.map((w, i) => {
-                const done = checked.has(w.name);
+                const done = isChecked(activeElement, w.name);
                 const srcStyle = SOURCE_COLORS[w.source];
                 return (
                   <tr
                     key={w.name}
-                    onClick={() => toggle(w.name)}
+                    onClick={() => toggle(activeElement, w.name)}
                     style={{
                       background: done ? "#f8f8f8" : i % 2 === 0 ? "#fff" : "#fafafa",
                       cursor: "pointer",
-                      transition: "background 0.1s",
-                      opacity: done ? 0.5 : 1,
+                      opacity: done ? 0.45 : 1,
+                      transition: "opacity 0.1s",
                     }}
                   >
                     <td style={tdStyle("center")}>
@@ -85,7 +111,7 @@ export default function GbfGridModule() {
                         display: "inline-flex", alignItems: "center", justifyContent: "center",
                         width: "18px", height: "18px", borderRadius: "4px",
                         border: done ? "none" : "1.5px solid #ccc",
-                        background: done ? "#1a1a1a" : "transparent",
+                        background: done ? meta.color : "transparent",
                         color: "#fff", fontSize: "11px", fontWeight: 700,
                       }}>
                         {done ? "✓" : ""}
@@ -113,9 +139,15 @@ export default function GbfGridModule() {
                   </tr>
                 );
               })}
+              {weapons.length === 0 && (
+                <tr><td colSpan={5} style={{ textAlign: "center", padding: "48px", color: "#aaa", fontSize: "13px" }}>No weapons listed</td></tr>
+              )}
             </tbody>
           </table>
         )}
+        <div style={{ marginTop: "12px", fontSize: "12px", color: "#aaa" }}>
+          {doneInView}/{weapons.length} checked in this category
+        </div>
       </div>
     </div>
   );
