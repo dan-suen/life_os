@@ -22,6 +22,15 @@ export default function GbfGridModule() {
   const totalDone = WEAPONS.filter(w => w.element === activeElement && isChecked(activeElement, w.name)).length;
   const totalAll = WEAPONS.filter(w => w.element === activeElement).length;
 
+  // Sources that still have unchecked weapons in the current tab
+  const incompleteSources = Array.from(
+    new Set(
+      weapons
+        .filter(w => w.source && !isChecked(activeElement, w.name))
+        .map(w => w.source)
+    )
+  ).sort();
+
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "#f9f9f9" }}>
       {/* Element tabs */}
@@ -80,6 +89,25 @@ export default function GbfGridModule() {
       )}
 
       <div style={{ flex: 1, padding: "24px 32px" }}>
+        {!loading && incompleteSources.length > 0 && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "16px" }}>
+            {incompleteSources.map(src => {
+              const s = SOURCE_COLORS[src];
+              const remaining = weapons.filter(w => w.source === src && !isChecked(activeElement, w.name)).length;
+              return (
+                <span key={src} style={{
+                  display: "inline-flex", alignItems: "center", gap: "5px",
+                  padding: "4px 10px", borderRadius: "99px", fontSize: "12px", fontWeight: 600,
+                  background: s?.bg ?? "#f0f0f0", color: s?.color ?? "#555",
+                  border: `1px solid ${s?.color ?? "#ccc"}30`,
+                }}>
+                  {src}
+                  <span style={{ fontWeight: 400, opacity: 0.75 }}>{remaining}</span>
+                </span>
+              );
+            })}
+          </div>
+        )}
         {loading ? (
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "40vh", color: "#aaa" }}>Loading…</div>
         ) : (
