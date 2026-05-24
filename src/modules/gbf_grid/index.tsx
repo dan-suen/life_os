@@ -7,6 +7,8 @@ const SOURCE_COLORS: Record<string, { bg: string; color: string }> = {
   "Regalia":       { bg: "#f0e8ff", color: "#6b21a8" },
   "Odious":        { bg: "#ffe8e8", color: "#b91c1c" },
   "Ennead":        { bg: "#e8f5e9", color: "#166534" },
+  "Ancestral":     { bg: "#e8f0ff", color: "#1e40af" },
+  "Malice":        { bg: "#fdf2ff", color: "#86198f" },
 };
 
 export default function GbfGridModule() {
