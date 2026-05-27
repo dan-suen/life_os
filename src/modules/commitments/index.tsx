@@ -11,13 +11,14 @@ import { EditPanel } from "./components/EditPanel";
 import { SettingsDrawer } from "./components/SettingsDrawer";
 import { UrgentSection } from "./components/UrgentSection";
 import { TodaysFocusPanel } from "./components/TodaysFocusPanel";
+import { RecommendationsPanel } from "./components/RecommendationsPanel";
 import { AreaSection } from "./components/AreaSection";
 import { Footer } from "./components/Footer";
 
 export default function CommitmentsModule() {
   const { commitments, loading, saving, error, setError, add, update, remove, toggleComplete, removeAllComplete } = useCommitments();
 
-  const [areaFilter, setAreaFilter] = useState<Area | "All" | "Today's Focus">("All");
+  const [areaFilter, setAreaFilter] = useState<Area | "All" | "Today's Focus" | "Recommendations">("Recommendations");
   const [tierFilter, setTierFilter] = useState<Tier | "All">("All");
   const [editing, setEditing] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<Commitment | null>(null);
@@ -28,7 +29,8 @@ export default function CommitmentsModule() {
   const [todoCollapsed, setTodoCollapsed] = useState(false);
 
   const isTodayView = areaFilter === "Today's Focus";
-  const effectiveAreaFilter = isTodayView ? "All" : areaFilter;
+  const isRecommendationsView = areaFilter === "Recommendations";
+  const effectiveAreaFilter = (isTodayView || isRecommendationsView) ? "All" : areaFilter;
 
   const filtered = commitments
     .filter(c => effectiveAreaFilter === "All" || c.area === effectiveAreaFilter)
@@ -127,13 +129,18 @@ export default function CommitmentsModule() {
               onChange={setNewForm} onAdd={handleAdd} onCancel={() => setShowAdd(false)} />
           )}
 
-          {showTodoPanel && todoItems.length > 0 && (
+          {isRecommendationsView && (
+            <RecommendationsPanel commitments={commitments} settings={settings}
+              onToggleComplete={toggleComplete} onEdit={handleEdit} onDelete={remove} />
+          )}
+
+          {!isRecommendationsView && showTodoPanel && todoItems.length > 0 && (
             <TodaysFocusPanel items={todoItems} settings={settings} isTodayView={isTodayView}
               collapsed={todoCollapsed} onToggleCollapse={() => setTodoCollapsed(!todoCollapsed)}
               onToggleComplete={toggleComplete} onEdit={handleEdit} onDelete={remove} />
           )}
 
-          {!isTodayView && areasToShow.map(area => {
+          {!isTodayView && !isRecommendationsView && areasToShow.map(area => {
             const items = getAreaItems(area);
             if (items.length === 0) return null;
             return (

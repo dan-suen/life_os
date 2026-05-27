@@ -5,6 +5,7 @@ export const IMPACTS = ["Low", "Medium", "High"] as const;
 export const ENERGIES = ["Low", "Medium", "High"] as const;
 
 export type Area = typeof AREAS[number];
+export type AreaFilter = Area | "All" | "Today's Focus" | "Recommendations";
 export type Tier = typeof TIERS[number];
 export type Effort = typeof EFFORTS[number];
 export type Impact = typeof IMPACTS[number];

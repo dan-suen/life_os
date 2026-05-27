@@ -1,22 +1,22 @@
-import type { Area, Tier } from "../types";
+import type { AreaFilter, Tier } from "../types";
 import { AREAS, TIERS } from "../types";
 import { AREA_COLORS, TIER_COLORS } from "../constants";
 import { s } from "../styles";
 
 interface Props {
   activeCount: number;
-  areaFilter: Area | "All" | "Today's Focus";
+  areaFilter: AreaFilter;
   tierFilter: Tier | "All";
   hasComplete: boolean;
-  onAreaChange: (area: Area | "All" | "Today's Focus") => void;
+  onAreaChange: (area: AreaFilter) => void;
   onTierChange: (tier: Tier | "All") => void;
   onAddClick: () => void;
   onSettingsClick: () => void;
   onRemoveComplete: () => void;
 }
 
-function AreaBtn({ area, active, onAreaChange }: { area: Area | "All" | "Today's Focus"; active: boolean; onAreaChange: (a: Area | "All" | "Today's Focus") => void }) {
-  const color = area === "All" ? "#1a1a1a" : area === "Today's Focus" ? "#7c3aed" : AREA_COLORS[area];
+function AreaBtn({ area, active, onAreaChange }: { area: AreaFilter; active: boolean; onAreaChange: (a: AreaFilter) => void }) {
+  const color = area === "Recommendations" ? "#b45309" : area === "All" ? "#1a1a1a" : area === "Today's Focus" ? "#7c3aed" : AREA_COLORS[area];
   return (
     <button onClick={() => onAreaChange(area)} style={{
       padding: "8px 16px", borderRadius: "6px 6px 0 0", fontSize: "13px", fontWeight: active ? 700 : 500,
@@ -55,6 +55,7 @@ export function Header({ activeCount, areaFilter, tierFilter, hasComplete, onAre
         </div>
       </div>
       <div style={s.navRow}>
+        <AreaBtn area="Recommendations" active={areaFilter === "Recommendations"} onAreaChange={onAreaChange} />
         <AreaBtn area="All" active={areaFilter === "All"} onAreaChange={onAreaChange} />
         <AreaBtn area="Today's Focus" active={areaFilter === "Today's Focus"} onAreaChange={onAreaChange} />
         {AREAS.map(a => <AreaBtn key={a} area={a} active={areaFilter === a} onAreaChange={onAreaChange} />)}

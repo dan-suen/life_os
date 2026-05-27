@@ -29,3 +29,21 @@ export function calcPriority(c: Commitment, settings: Settings): number {
     urgencyScore(c.deadline) * urgency;
   return Math.round(base * energyMult * 10) / 10;
 }
+
+export function calcRecommendationScore(c: Commitment, settings: Settings): number {
+  if (c.completed) return -1;
+  let score = 0;
+  if (c.tier === "Urgent") score += 10000;
+  else if (c.tier === "Daily") score += 5000;
+  else if (c.tier === "Weekly") score += 3000;
+  else if (c.tier === "Non-Priority") return -1;
+  else score += calcPriority(c, settings) * 10;
+  if (c.deadline) {
+    const days = Math.ceil((new Date(c.deadline).getTime() - Date.now()) / 86400000);
+    if (days <= 0) score += 4000 + Math.abs(days) * 50;
+    else if (days <= 3) score += 2000;
+    else if (days <= 7) score += 1000;
+    else if (days <= 14) score += 400;
+  }
+  return score;
+}
