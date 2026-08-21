@@ -1,6 +1,9 @@
 import { useState } from "react";
-import { WEAPONS, ELEMENTS, CATEGORIES, ELEMENT_META, type Element, type Category } from "./data";
+import { ELEMENTS, CATEGORIES, ELEMENT_META, type Element, type Category, type Weapon } from "./data";
 import { useGbfGrid } from "./hooks/useGbfGrid";
+import { useWeapons } from "./hooks/useWeapons";
+import { AddPanel } from "./components/AddPanel";
+import { EditPanel } from "./components/EditPanel";
 
 const SOURCE_COLORS: Record<string, { bg: string; color: string }> = {
   "Omega Rebirth": { bg: "#fff0e0", color: "#b85c00" },
@@ -14,7 +17,14 @@ const SOURCE_COLORS: Record<string, { bg: string; color: string }> = {
 export default function GbfGridModule() {
   const [activeElement, setActiveElement] = useState<Element>("Fire");
   const [activeCategory, setActiveCategory] = useState<Category>("Core");
-  const { isChecked, loading, error, setError, toggle } = useGbfGrid();
+  const { isChecked, loading: checkedLoading, error: checkedError, setError: setCheckedError, toggle } = useGbfGrid();
+  const { weapons: WEAPONS, loading: weaponsLoading, saving, error: weaponsError, setError: setWeaponsError, add, update, remove } = useWeapons();
+  const [showAdd, setShowAdd] = useState(false);
+  const [editing, setEditing] = useState<Weapon | null>(null);
+
+  const loading = checkedLoading || weaponsLoading;
+  const error = weaponsError ?? checkedError;
+  function dismissError() { setWeaponsError(null); setCheckedError(null); }
 
   const meta = ELEMENT_META[activeElement];
   const weapons = WEAPONS.filter(w => w.element === activeElement && w.category === activeCategory);
@@ -30,6 +40,18 @@ export default function GbfGridModule() {
         .map(w => w.source)
     )
   ).sort();
+
+  async function handleAdd(form: Omit<Weapon, "id">) {
+    if (!form.name.trim()) return;
+    const ok = await add(form);
+    if (ok) setShowAdd(false);
+  }
+
+  async function handleSaveEdit() {
+    if (!editing) return;
+    const ok = await update(editing);
+    if (ok) setEditing(null);
+  }
 
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "#f9f9f9" }}>
@@ -55,11 +77,19 @@ export default function GbfGridModule() {
 
       {/* Category tabs + title */}
       <div style={{ background: "#fff", borderBottom: "1px solid #e5e5e5", padding: "16px 32px 0" }}>
-        <div style={{ display: "flex", alignItems: "baseline", gap: "12px", marginBottom: "10px" }}>
-          <span style={{ fontSize: "17px", fontWeight: 700, letterSpacing: "-0.02em", color: meta.color }}>
-            {activeElement} · {meta.boss}
-          </span>
-          <span style={{ fontSize: "13px", color: "#888" }}>{totalDone}/{totalAll} obtained</span>
+        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: "12px", marginBottom: "10px" }}>
+          <div style={{ display: "flex", alignItems: "baseline", gap: "12px" }}>
+            <span style={{ fontSize: "17px", fontWeight: 700, letterSpacing: "-0.02em", color: meta.color }}>
+              {activeElement} · {meta.boss}
+            </span>
+            <span style={{ fontSize: "13px", color: "#888" }}>{totalDone}/{totalAll} obtained</span>
+          </div>
+          <button
+            style={{ background: "#1a1a1a", color: "#fff", border: "none", padding: "6px 14px", borderRadius: "6px", fontSize: "12px", fontWeight: 600, cursor: "pointer" }}
+            onClick={() => { setShowAdd(!showAdd); setEditing(null); }}
+          >
+            + Add
+          </button>
         </div>
         {!loading && incompleteSources.length > 0 && (
           <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "12px" }}>
@@ -103,7 +133,7 @@ export default function GbfGridModule() {
       {error && (
         <div style={{ background: "#fff0f0", color: "#c0392b", padding: "10px 32px", fontSize: "12px", borderBottom: "1px solid #f5c6c6" }}>
           ⚠ {error}{" "}
-          <span style={{ cursor: "pointer", textDecoration: "underline", marginLeft: "8px" }} onClick={() => setError(null)}>dismiss</span>
+          <span style={{ cursor: "pointer", textDecoration: "underline", marginLeft: "8px" }} onClick={dismissError}>dismiss</span>
         </div>
       )}
 
@@ -111,72 +141,92 @@ export default function GbfGridModule() {
         {loading ? (
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "40vh", color: "#aaa" }}>Loading…</div>
         ) : (
-          <table style={{ width: "100%", borderCollapse: "collapse", background: "#fff", borderRadius: "8px", overflow: "hidden", boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
-            <thead>
-              <tr style={{ background: "#1a1a1a", color: "#fff" }}>
-                <th style={thStyle("40px")}>✓</th>
-                <th style={thStyle()}>Weapon</th>
-                <th style={thStyle("80px")}>Rank</th>
-                <th style={thStyle("100px")}>Copies</th>
-                <th style={thStyle("140px")}>Source</th>
-              </tr>
-            </thead>
-            <tbody>
-              {weapons.map((w, i) => {
-                const done = isChecked(activeElement, w.name);
-                const srcStyle = SOURCE_COLORS[w.source];
-                return (
-                  <tr
-                    key={w.name}
-                    onClick={() => toggle(activeElement, w.name)}
-                    style={{
-                      background: done ? "#f8f8f8" : i % 2 === 0 ? "#fff" : "#fafafa",
-                      cursor: "pointer",
-                      opacity: done ? 0.45 : 1,
-                      transition: "opacity 0.1s",
-                    }}
-                  >
-                    <td style={tdStyle("center")}>
-                      <span style={{
-                        display: "inline-flex", alignItems: "center", justifyContent: "center",
-                        width: "18px", height: "18px", borderRadius: "4px",
-                        border: done ? "none" : "1.5px solid #ccc",
-                        background: done ? meta.color : "transparent",
-                        color: "#fff", fontSize: "11px", fontWeight: 700,
-                      }}>
-                        {done ? "✓" : ""}
-                      </span>
-                    </td>
-                    <td style={{ ...tdStyle(), fontWeight: 500, textDecoration: done ? "line-through" : "none", color: done ? "#999" : "#1a1a1a" }}>
-                      {w.name}
-                    </td>
-                    <td style={tdStyle("center")}>{w.rank}</td>
-                    <td style={tdStyle("center")}>{w.copies}</td>
-                    <td style={tdStyle("center")}>
-                      {w.source ? (
+          <>
+            {showAdd && (
+              <AddPanel element={activeElement} category={activeCategory} saving={saving} onAdd={handleAdd} onCancel={() => setShowAdd(false)} />
+            )}
+            {editing && (
+              <EditPanel form={editing} saving={saving} onChange={setEditing} onSave={handleSaveEdit} onCancel={() => setEditing(null)} />
+            )}
+            <table style={{ width: "100%", borderCollapse: "collapse", background: "#fff", borderRadius: "8px", overflow: "hidden", boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
+              <thead>
+                <tr style={{ background: "#1a1a1a", color: "#fff" }}>
+                  <th style={thStyle("40px")}>✓</th>
+                  <th style={thStyle()}>Weapon</th>
+                  <th style={thStyle("80px")}>Rank</th>
+                  <th style={thStyle("100px")}>Copies</th>
+                  <th style={thStyle("140px")}>Source</th>
+                  <th style={thStyle("70px")}></th>
+                </tr>
+              </thead>
+              <tbody>
+                {weapons.map((w, i) => {
+                  const done = isChecked(activeElement, w.name);
+                  const srcStyle = SOURCE_COLORS[w.source];
+                  return (
+                    <tr
+                      key={w.id}
+                      onClick={() => toggle(activeElement, w.name)}
+                      style={{
+                        background: done ? "#f8f8f8" : i % 2 === 0 ? "#fff" : "#fafafa",
+                        cursor: "pointer",
+                        opacity: done ? 0.45 : 1,
+                        transition: "opacity 0.1s",
+                      }}
+                    >
+                      <td style={tdStyle("center")}>
                         <span style={{
-                          display: "inline-block", padding: "2px 8px", borderRadius: "4px",
-                          fontSize: "12px", fontWeight: 600,
-                          background: srcStyle?.bg ?? "#f0f0f0",
-                          color: srcStyle?.color ?? "#555",
+                          display: "inline-flex", alignItems: "center", justifyContent: "center",
+                          width: "18px", height: "18px", borderRadius: "4px",
+                          border: done ? "none" : "1.5px solid #ccc",
+                          background: done ? meta.color : "transparent",
+                          color: "#fff", fontSize: "11px", fontWeight: 700,
                         }}>
-                          {w.source}
+                          {done ? "✓" : ""}
                         </span>
-                      ) : (
-                        <span style={{ color: "#ccc" }}>—</span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-              {weapons.length === 0 && (
-                <tr><td colSpan={5} style={{ textAlign: "center", padding: "48px", color: "#aaa", fontSize: "13px" }}>No weapons listed</td></tr>
-              )}
-            </tbody>
-          </table>
+                      </td>
+                      <td style={{ ...tdStyle(), fontWeight: 500, textDecoration: done ? "line-through" : "none", color: done ? "#999" : "#1a1a1a" }}>
+                        {w.name}
+                      </td>
+                      <td style={tdStyle("center")}>{w.rank || "—"}</td>
+                      <td style={tdStyle("center")}>{w.copies || "—"}</td>
+                      <td style={tdStyle("center")}>
+                        {w.source ? (
+                          <span style={{
+                            display: "inline-block", padding: "2px 8px", borderRadius: "4px",
+                            fontSize: "12px", fontWeight: 600,
+                            background: srcStyle?.bg ?? "#f0f0f0",
+                            color: srcStyle?.color ?? "#555",
+                          }}>
+                            {w.source}
+                          </span>
+                        ) : (
+                          <span style={{ color: "#ccc" }}>—</span>
+                        )}
+                      </td>
+                      <td style={tdStyle("center")} onClick={e => e.stopPropagation()}>
+                        <button
+                          style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: "13px", padding: "2px 5px", color: "#888" }}
+                          onClick={() => { setEditing(w); setShowAdd(false); }}
+                        >✎</button>
+                        <button
+                          style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: "13px", padding: "2px 5px", color: "#c0392b" }}
+                          onClick={() => { if (confirm(`Remove "${w.name}"?`)) remove(w.id); }}
+                        >✕</button>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {weapons.length === 0 && (
+                  <tr><td colSpan={6} style={{ textAlign: "center", padding: "48px", color: "#aaa", fontSize: "13px" }}>No weapons listed</td></tr>
+                )}
+              </tbody>
+            </table>
+          </>
         )}
         <div style={{ marginTop: "12px", fontSize: "12px", color: "#aaa" }}>
           {doneInView}/{weapons.length} checked in this category
+          {saving && <span style={{ marginLeft: "12px", color: "#2253c7" }}>Saving…</span>}
         </div>
       </div>
     </div>
