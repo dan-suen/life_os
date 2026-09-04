@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { supabase } from "../../../lib/supabase";
 import type { Weapon } from "../data";
 
+const COLS = "id,element,name,rank,copies,source";
+
 export function useWeapons() {
   const [weapons, setWeapons] = useState<Weapon[]>([]);
   const [loading, setLoading] = useState(true);
@@ -11,7 +13,7 @@ export function useWeapons() {
   useEffect(() => {
     async function load() {
       setLoading(true);
-      const { data, error: loadError } = await supabase.from("gbf_weapons").select("*").order("id");
+      const { data, error: loadError } = await supabase.from("gbf_weapons").select(COLS).order("id");
       if (loadError) { setError(loadError.message); setLoading(false); return; }
       setWeapons((data ?? []) as Weapon[]);
       setLoading(false);
@@ -21,7 +23,7 @@ export function useWeapons() {
 
   async function add(form: Omit<Weapon, "id">): Promise<boolean> {
     setSaving(true);
-    const { data, error: addError } = await supabase.from("gbf_weapons").insert([form]).select().single();
+    const { data, error: addError } = await supabase.from("gbf_weapons").insert([form]).select(COLS).single();
     if (addError) { setError(addError.message); setSaving(false); return false; }
     setWeapons(p => [...p, data as Weapon]);
     setSaving(false);
@@ -31,7 +33,7 @@ export function useWeapons() {
   async function update(form: Weapon): Promise<boolean> {
     setSaving(true);
     const { error: updateError } = await supabase.from("gbf_weapons").update({
-      element: form.element, category: form.category, name: form.name,
+      element: form.element, name: form.name,
       rank: form.rank, copies: form.copies, source: form.source,
     }).eq("id", form.id);
     if (updateError) { setError(updateError.message); setSaving(false); return false; }

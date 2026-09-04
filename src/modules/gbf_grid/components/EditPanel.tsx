@@ -1,5 +1,5 @@
-import type { Weapon, Element, Category } from "../data";
-import { ELEMENTS, CATEGORIES } from "../data";
+import type { Weapon, Element } from "../data";
+import { ELEMENTS, GROUPS } from "../data";
 
 interface Props {
   form: Weapon;
@@ -27,15 +27,16 @@ export function EditPanel({ form, saving, onChange, onSave, onCancel }: Props) {
             onKeyDown={e => { if (e.key === "Enter") onSave(); if (e.key === "Escape") onCancel(); }} />
         </div>
         <div style={fieldStyle}>
-          <label style={labelStyle}>Element</label>
-          <select style={selStyle} value={form.element} onChange={e => onChange({ ...form, element: e.target.value as Element })}>
-            {ELEMENTS.map(el => <option key={el}>{el}</option>)}
+          <label style={labelStyle}>Group</label>
+          <select style={selStyle} value={form.source} onChange={e => onChange({ ...form, source: e.target.value })}>
+            {GROUPS.map(g => <option key={g}>{g}</option>)}
+            {!GROUPS.includes(form.source) && <option>{form.source}</option>}
           </select>
         </div>
         <div style={fieldStyle}>
-          <label style={labelStyle}>Category</label>
-          <select style={selStyle} value={form.category} onChange={e => onChange({ ...form, category: e.target.value as Category })}>
-            {CATEGORIES.map(c => <option key={c}>{c}</option>)}
+          <label style={labelStyle}>Element</label>
+          <select style={selStyle} value={form.element} onChange={e => onChange({ ...form, element: e.target.value as Element })}>
+            {ELEMENTS.map(el => <option key={el}>{el}</option>)}
           </select>
         </div>
         <div style={fieldStyle}>
@@ -45,10 +46,6 @@ export function EditPanel({ form, saving, onChange, onSave, onCancel }: Props) {
         <div style={fieldStyle}>
           <label style={labelStyle}>Copies</label>
           <input style={inputStyle} value={form.copies} onChange={e => onChange({ ...form, copies: e.target.value })} />
-        </div>
-        <div style={{ ...fieldStyle, minWidth: "140px" }}>
-          <label style={labelStyle}>Source</label>
-          <input style={inputStyle} value={form.source} onChange={e => onChange({ ...form, source: e.target.value })} />
         </div>
       </div>
       <div style={{ display: "flex", gap: "8px" }}>

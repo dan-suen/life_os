@@ -1,0 +1,1325 @@
+[
+ {
+  "element": "Light",
+  "name": "Luminiera Lance Credo",
+  "rank": "",
+  "copies": "2",
+  "source": "Omega Rebirth"
+ },
+ {
+  "element": "Light",
+  "name": "Luminiera Saber Credo",
+  "rank": "",
+  "copies": "2",
+  "source": "Omega Rebirth"
+ },
+ {
+  "element": "Fire",
+  "name": "Scythe of Renunciation",
+  "rank": "",
+  "copies": "",
+  "source": "Dark Opus"
+ },
+ {
+  "element": "Wind",
+  "name": "Spear of Renunciation",
+  "rank": "",
+  "copies": "",
+  "source": "Dark Opus"
+ },
+ {
+  "element": "Water",
+  "name": "Staff of Renunciation",
+  "rank": "",
+  "copies": "",
+  "source": "Dark Opus"
+ },
+ {
+  "element": "Earth",
+  "name": "Harp of Renunciation",
+  "rank": "",
+  "copies": "",
+  "source": "Dark Opus"
+ },
+ {
+  "element": "Light",
+  "name": "Sword of Renunciation",
+  "rank": "",
+  "copies": "",
+  "source": "Dark Opus"
+ },
+ {
+  "element": "Dark",
+  "name": "Katana of Renunciation",
+  "rank": "",
+  "copies": "",
+  "source": "Dark Opus"
+ },
+ {
+  "element": "Fire",
+  "name": "Doombringer Sword",
+  "rank": "300",
+  "copies": "",
+  "source": "Destroyer"
+ },
+ {
+  "element": "Wind",
+  "name": "Doombringer Gauntlet",
+  "rank": "300",
+  "copies": "",
+  "source": "Destroyer"
+ },
+ {
+  "element": "Water",
+  "name": "Doombringer Edge",
+  "rank": "300",
+  "copies": "",
+  "source": "Destroyer"
+ },
+ {
+  "element": "Earth",
+  "name": "Doombringer Trident",
+  "rank": "300",
+  "copies": "",
+  "source": "Destroyer"
+ },
+ {
+  "element": "Light",
+  "name": "Doombringer Bow",
+  "rank": "300",
+  "copies": "",
+  "source": "Destroyer"
+ },
+ {
+  "element": "Dark",
+  "name": "Doombringer Lyre",
+  "rank": "300",
+  "copies": "",
+  "source": "Destroyer"
+ },
+ {
+  "element": "Any",
+  "name": "Ultima Axe",
+  "rank": "",
+  "copies": "",
+  "source": "Ultima"
+ },
+ {
+  "element": "Any",
+  "name": "Ultima Blade",
+  "rank": "",
+  "copies": "",
+  "source": "Ultima"
+ },
+ {
+  "element": "Any",
+  "name": "Ultima Bow",
+  "rank": "",
+  "copies": "",
+  "source": "Ultima"
+ },
+ {
+  "element": "Any",
+  "name": "Ultima Claw",
+  "rank": "",
+  "copies": "",
+  "source": "Ultima"
+ },
+ {
+  "element": "Any",
+  "name": "Ultima Dagger",
+  "rank": "",
+  "copies": "",
+  "source": "Ultima"
+ },
+ {
+  "element": "Any",
+  "name": "Ultima Gun",
+  "rank": "",
+  "copies": "",
+  "source": "Ultima"
+ },
+ {
+  "element": "Any",
+  "name": "Ultima Harp",
+  "rank": "",
+  "copies": "",
+  "source": "Ultima"
+ },
+ {
+  "element": "Any",
+  "name": "Ultima Spear",
+  "rank": "",
+  "copies": "",
+  "source": "Ultima"
+ },
+ {
+  "element": "Any",
+  "name": "Ultima Staff",
+  "rank": "",
+  "copies": "",
+  "source": "Ultima"
+ },
+ {
+  "element": "Any",
+  "name": "Ultima Sword",
+  "rank": "",
+  "copies": "",
+  "source": "Ultima"
+ },
+ {
+  "element": "Any",
+  "name": "Axe of Bahamut Coda",
+  "rank": "",
+  "copies": "",
+  "source": "Bahamut"
+ },
+ {
+  "element": "Any",
+  "name": "Blade of Bahamut Coda",
+  "rank": "",
+  "copies": "",
+  "source": "Bahamut"
+ },
+ {
+  "element": "Any",
+  "name": "Bow of Bahamut Coda",
+  "rank": "",
+  "copies": "",
+  "source": "Bahamut"
+ },
+ {
+  "element": "Any",
+  "name": "Dagger of Bahamut Coda",
+  "rank": "",
+  "copies": "",
+  "source": "Bahamut"
+ },
+ {
+  "element": "Any",
+  "name": "Fist of Bahamut Coda",
+  "rank": "",
+  "copies": "",
+  "source": "Bahamut"
+ },
+ {
+  "element": "Any",
+  "name": "Harp of Bahamut Coda",
+  "rank": "",
+  "copies": "",
+  "source": "Bahamut"
+ },
+ {
+  "element": "Any",
+  "name": "Pistol of Bahamut Coda",
+  "rank": "",
+  "copies": "",
+  "source": "Bahamut"
+ },
+ {
+  "element": "Any",
+  "name": "Spear of Bahamut Coda",
+  "rank": "",
+  "copies": "",
+  "source": "Bahamut"
+ },
+ {
+  "element": "Any",
+  "name": "Staff of Bahamut Coda",
+  "rank": "",
+  "copies": "",
+  "source": "Bahamut"
+ },
+ {
+  "element": "Any",
+  "name": "Sword of Bahamut Coda",
+  "rank": "",
+  "copies": "",
+  "source": "Bahamut"
+ },
+ {
+  "element": "Any",
+  "name": "Worldbreaking Tauros",
+  "rank": "",
+  "copies": "",
+  "source": "World"
+ },
+ {
+  "element": "Any",
+  "name": "Worldforging Moros",
+  "rank": "",
+  "copies": "",
+  "source": "World"
+ },
+ {
+  "element": "Any",
+  "name": "Worldscathing Leon",
+  "rank": "",
+  "copies": "",
+  "source": "World"
+ },
+ {
+  "element": "Any",
+  "name": "Worldstorming Aetos",
+  "rank": "",
+  "copies": "",
+  "source": "World"
+ },
+ {
+  "element": "Any",
+  "name": "Worldvexing Angelos",
+  "rank": "",
+  "copies": "",
+  "source": "World"
+ },
+ {
+  "element": "Any",
+  "name": "Altruism-Soul Staff",
+  "rank": "",
+  "copies": "",
+  "source": "Celestial"
+ },
+ {
+  "element": "Any",
+  "name": "Covenant-Ruin Fist",
+  "rank": "",
+  "copies": "",
+  "source": "Celestial"
+ },
+ {
+  "element": "Any",
+  "name": "Demolition-Tiger Axe",
+  "rank": "",
+  "copies": "",
+  "source": "Celestial"
+ },
+ {
+  "element": "Any",
+  "name": "Desolation-Crown Bow",
+  "rank": "",
+  "copies": "",
+  "source": "Celestial"
+ },
+ {
+  "element": "Any",
+  "name": "Fantasia-Realm Harp",
+  "rank": "",
+  "copies": "",
+  "source": "Celestial"
+ },
+ {
+  "element": "Any",
+  "name": "Gateway-Star Sword",
+  "rank": "",
+  "copies": "",
+  "source": "Celestial"
+ },
+ {
+  "element": "Any",
+  "name": "Oration-Life Katana",
+  "rank": "",
+  "copies": "",
+  "source": "Celestial"
+ },
+ {
+  "element": "Any",
+  "name": "Selfless-Rift Spear",
+  "rank": "",
+  "copies": "",
+  "source": "Celestial"
+ },
+ {
+  "element": "Any",
+  "name": "Twinfall-Sky Blade",
+  "rank": "",
+  "copies": "",
+  "source": "Celestial"
+ },
+ {
+  "element": "Any",
+  "name": "Twinpain-Wolf Gun",
+  "rank": "",
+  "copies": "",
+  "source": "Celestial"
+ },
+ {
+  "element": "Fire",
+  "name": "Draconic Harp",
+  "rank": "",
+  "copies": "",
+  "source": "Draconic"
+ },
+ {
+  "element": "Fire",
+  "name": "Refrain of Blazing Vigor",
+  "rank": "",
+  "copies": "",
+  "source": "Draconic"
+ },
+ {
+  "element": "Wind",
+  "name": "Draconic Rod",
+  "rank": "",
+  "copies": "",
+  "source": "Draconic"
+ },
+ {
+  "element": "Wind",
+  "name": "Prayer of Grand Gales",
+  "rank": "",
+  "copies": "",
+  "source": "Draconic"
+ },
+ {
+  "element": "Water",
+  "name": "Draconic Buster",
+  "rank": "",
+  "copies": "",
+  "source": "Draconic"
+ },
+ {
+  "element": "Water",
+  "name": "Judgment of Torrential Tides",
+  "rank": "",
+  "copies": "",
+  "source": "Draconic"
+ },
+ {
+  "element": "Earth",
+  "name": "Bounty of Gracious Earth",
+  "rank": "",
+  "copies": "",
+  "source": "Draconic"
+ },
+ {
+  "element": "Earth",
+  "name": "Draconic Bow",
+  "rank": "",
+  "copies": "",
+  "source": "Draconic"
+ },
+ {
+  "element": "Light",
+  "name": "Draconic Blade",
+  "rank": "",
+  "copies": "",
+  "source": "Draconic"
+ },
+ {
+  "element": "Light",
+  "name": "Radiance of Insightful Rebirth",
+  "rank": "",
+  "copies": "",
+  "source": "Draconic"
+ },
+ {
+  "element": "Dark",
+  "name": "Draconic Fire",
+  "rank": "",
+  "copies": "",
+  "source": "Draconic"
+ },
+ {
+  "element": "Dark",
+  "name": "Festering of Mournful Obsequies",
+  "rank": "",
+  "copies": "",
+  "source": "Draconic"
+ },
+ {
+  "element": "Fire",
+  "name": "Blazefist of Prosperity Verboten",
+  "rank": "",
+  "copies": "2",
+  "source": "Odious"
+ },
+ {
+  "element": "Fire",
+  "name": "Deathcannon of Prosperity Verboten",
+  "rank": "",
+  "copies": "2",
+  "source": "Odious"
+ },
+ {
+  "element": "Fire",
+  "name": "Demonspear of Prosperity Verboten",
+  "rank": "",
+  "copies": "3",
+  "source": "Odious"
+ },
+ {
+  "element": "Wind",
+  "name": "Demondagger of Liberation Verboten",
+  "rank": "",
+  "copies": "2",
+  "source": "Odious"
+ },
+ {
+  "element": "Wind",
+  "name": "Gougelance of Liberation Verboten",
+  "rank": "",
+  "copies": "3",
+  "source": "Odious"
+ },
+ {
+  "element": "Wind",
+  "name": "Sealhammer of Liberation Verboten",
+  "rank": "",
+  "copies": "2",
+  "source": "Odious"
+ },
+ {
+  "element": "Water",
+  "name": "Cyclestaff of Mortality Verboten",
+  "rank": "",
+  "copies": "2",
+  "source": "Odious"
+ },
+ {
+  "element": "Water",
+  "name": "Deepstrings of Mortality Verboten",
+  "rank": "",
+  "copies": "2",
+  "source": "Odious"
+ },
+ {
+  "element": "Water",
+  "name": "Demonsword of Mortality Verboten",
+  "rank": "",
+  "copies": "3",
+  "source": "Odious"
+ },
+ {
+  "element": "Water",
+  "name": "Fiendspear of Mortality Verboten",
+  "rank": "",
+  "copies": "4",
+  "source": "Odious"
+ },
+ {
+  "element": "Water",
+  "name": "Terrorbow of Mortality Verboten",
+  "rank": "",
+  "copies": "1",
+  "source": "Odious"
+ },
+ {
+  "element": "Earth",
+  "name": "Demonedge of Desire Verboten",
+  "rank": "",
+  "copies": "2",
+  "source": "Odious"
+ },
+ {
+  "element": "Earth",
+  "name": "Heartstrings of Desire Verboten",
+  "rank": "",
+  "copies": "2",
+  "source": "Odious"
+ },
+ {
+  "element": "Earth",
+  "name": "Lusterbow of Desire Verboten",
+  "rank": "",
+  "copies": "3",
+  "source": "Odious"
+ },
+ {
+  "element": "Light",
+  "name": "Blightrifle of Knowledge Verboten",
+  "rank": "",
+  "copies": "3",
+  "source": "Odious"
+ },
+ {
+  "element": "Light",
+  "name": "Machinahand of Knowledge Verboten",
+  "rank": "",
+  "copies": "2",
+  "source": "Odious"
+ },
+ {
+  "element": "Light",
+  "name": "Spirelance of Knowledge Verboten",
+  "rank": "",
+  "copies": "2",
+  "source": "Odious"
+ },
+ {
+  "element": "Dark",
+  "name": "Codex of Sanctity Verboten",
+  "rank": "",
+  "copies": "1",
+  "source": "Odious"
+ },
+ {
+  "element": "Dark",
+  "name": "Ritesword of Sanctity Verboten",
+  "rank": "",
+  "copies": "2",
+  "source": "Odious"
+ },
+ {
+  "element": "Dark",
+  "name": "Spiritcleaver of Sanctity Verboten",
+  "rank": "",
+  "copies": "3",
+  "source": "Odious"
+ },
+ {
+  "element": "Fire",
+  "name": "Extinction Blade",
+  "rank": "",
+  "copies": "Mk II: Atk 2 || Unforged: Def 2",
+  "source": "Revans"
+ },
+ {
+  "element": "Fire",
+  "name": "Mortality Bow",
+  "rank": "",
+  "copies": "Mk II: Atk 1, Sp 1 || Unforged: Def 1",
+  "source": "Revans"
+ },
+ {
+  "element": "Wind",
+  "name": "Sette di Spade",
+  "rank": "",
+  "copies": "Mk II: Atk 3, Sp 1 || Unforged: Def 2",
+  "source": "Revans"
+ },
+ {
+  "element": "Wind",
+  "name": "Spada di Vento",
+  "rank": "",
+  "copies": "Mk II: Atk 1, Sp 1 || Unforged: Def 1",
+  "source": "Revans"
+ },
+ {
+  "element": "Water",
+  "name": "Lagrange",
+  "rank": "",
+  "copies": "Mk II: Atk 2, Sp 1 || Unforged: Def 2",
+  "source": "Revans"
+ },
+ {
+  "element": "Water",
+  "name": "Schrodinger",
+  "rank": "",
+  "copies": "Mk II: Atk 2, Sp 1 || Unforged: Def 2",
+  "source": "Revans"
+ },
+ {
+  "element": "Earth",
+  "name": "Claw of the Dragonslayer",
+  "rank": "",
+  "copies": "Mk II: Atk 1, Sp 1 || Unforged: Atk 1, Def 1",
+  "source": "Revans"
+ },
+ {
+  "element": "Earth",
+  "name": "Fang of the Dragonslayer",
+  "rank": "",
+  "copies": "Mk II: Atk 4, Sp 1 || Unforged: Atk 1, Def 1",
+  "source": "Revans"
+ },
+ {
+  "element": "Light",
+  "name": "Concordia",
+  "rank": "",
+  "copies": "Mk II: Atk 2, Sp 1 || Unforged: Def 1",
+  "source": "Revans"
+ },
+ {
+  "element": "Dark",
+  "name": "Forbidden Agastia",
+  "rank": "",
+  "copies": "Mk II: Atk 4 || Unforged: Def 1",
+  "source": "Revans"
+ },
+ {
+  "element": "Dark",
+  "name": "Forsaken Agastia",
+  "rank": "",
+  "copies": "Mk II: Atk 2, Sp 1 || Unforged: Def 1",
+  "source": "Revans"
+ },
+ {
+  "element": "Fire",
+  "name": "Nilakantha",
+  "rank": "",
+  "copies": "2",
+  "source": "Regalia"
+ },
+ {
+  "element": "Wind",
+  "name": "Last Storm Harp",
+  "rank": "",
+  "copies": "3",
+  "source": "Regalia"
+ },
+ {
+  "element": "Water",
+  "name": "Spirit of Mana",
+  "rank": "",
+  "copies": "1",
+  "source": "Regalia"
+ },
+ {
+  "element": "Water",
+  "name": "Tyros Zither",
+  "rank": "",
+  "copies": "2",
+  "source": "Regalia"
+ },
+ {
+  "element": "Earth",
+  "name": "Godsworn Edge",
+  "rank": "",
+  "copies": "1",
+  "source": "Regalia"
+ },
+ {
+  "element": "Earth",
+  "name": "Nibelung Horn",
+  "rank": "",
+  "copies": "3",
+  "source": "Regalia"
+ },
+ {
+  "element": "Light",
+  "name": "Pillar of Flame",
+  "rank": "",
+  "copies": "3",
+  "source": "Regalia"
+ },
+ {
+  "element": "Dark",
+  "name": "Abyss Spine",
+  "rank": "",
+  "copies": "2",
+  "source": "Regalia"
+ },
+ {
+  "element": "Dark",
+  "name": "Zechariah",
+  "rank": "",
+  "copies": "1",
+  "source": "Regalia"
+ },
+ {
+  "element": "Fire",
+  "name": "Al-Abad",
+  "rank": "",
+  "copies": "Atk 1, Sp 1",
+  "source": "Ennead"
+ },
+ {
+  "element": "Fire",
+  "name": "Benbenet",
+  "rank": "",
+  "copies": "Atk 2",
+  "source": "Ennead"
+ },
+ {
+  "element": "Wind",
+  "name": "Abu Simbel",
+  "rank": "",
+  "copies": "Atk 1",
+  "source": "Ennead"
+ },
+ {
+  "element": "Wind",
+  "name": "Mandjet",
+  "rank": "",
+  "copies": "Atk 1",
+  "source": "Ennead"
+ },
+ {
+  "element": "Water",
+  "name": "Uraeus",
+  "rank": "",
+  "copies": "Atk 1",
+  "source": "Ennead"
+ },
+ {
+  "element": "Earth",
+  "name": "Ished",
+  "rank": "",
+  "copies": "Atk 1",
+  "source": "Ennead"
+ },
+ {
+  "element": "Earth",
+  "name": "Tatjenen",
+  "rank": "",
+  "copies": "Atk 1",
+  "source": "Ennead"
+ },
+ {
+  "element": "Light",
+  "name": "Harakhte",
+  "rank": "",
+  "copies": "Atk 2, Def 1",
+  "source": "Ennead"
+ },
+ {
+  "element": "Light",
+  "name": "Harsiesis",
+  "rank": "",
+  "copies": "Atk 1",
+  "source": "Ennead"
+ },
+ {
+  "element": "Dark",
+  "name": "Abydos",
+  "rank": "",
+  "copies": "Atk 1",
+  "source": "Ennead"
+ },
+ {
+  "element": "Wind",
+  "name": "Ewiyar's Beak",
+  "rank": "",
+  "copies": "2",
+  "source": "Ancestral"
+ },
+ {
+  "element": "Water",
+  "name": "Wamdus's Cnidocyte",
+  "rank": "",
+  "copies": "2",
+  "source": "Ancestral"
+ },
+ {
+  "element": "Earth",
+  "name": "Galleon's Jaw",
+  "rank": "",
+  "copies": "1",
+  "source": "Ancestral"
+ },
+ {
+  "element": "Dark",
+  "name": "Fediel's Spine",
+  "rank": "",
+  "copies": "2",
+  "source": "Ancestral"
+ },
+ {
+  "element": "Dark",
+  "name": "Agonize",
+  "rank": "",
+  "copies": "2",
+  "source": "Menace"
+ },
+ {
+  "element": "Wind",
+  "name": "Ancient Nalakuvara",
+  "rank": "",
+  "copies": "1",
+  "source": "Primal"
+ },
+ {
+  "element": "Water",
+  "name": "Ancient Auberon",
+  "rank": "",
+  "copies": "2",
+  "source": "Primal"
+ },
+ {
+  "element": "Earth",
+  "name": "Ancient Perseus",
+  "rank": "",
+  "copies": "1",
+  "source": "Primal"
+ },
+ {
+  "element": "Dark",
+  "name": "Ancient Cortana",
+  "rank": "",
+  "copies": "1",
+  "source": "Primal"
+ },
+ {
+  "element": "Water",
+  "name": "Leviathan Spear Omega",
+  "rank": "",
+  "copies": "1",
+  "source": "Omega"
+ },
+ {
+  "element": "Light",
+  "name": "Luminiera Sword Omega",
+  "rank": "",
+  "copies": "3",
+  "source": "Omega"
+ },
+ {
+  "element": "Fire",
+  "name": "Exo Krodha",
+  "rank": "",
+  "copies": "Atk 1, Sp 1",
+  "source": "Exo"
+ },
+ {
+  "element": "Fire",
+  "name": "Exo Maitrah Karuna",
+  "rank": "",
+  "copies": "Atk 1, Sp 1",
+  "source": "Exo"
+ },
+ {
+  "element": "Wind",
+  "name": "Exo Australis",
+  "rank": "",
+  "copies": "Atk 1, Sp 1",
+  "source": "Exo"
+ },
+ {
+  "element": "Wind",
+  "name": "Exo Pelion",
+  "rank": "",
+  "copies": "Atk 1, Sp 1",
+  "source": "Exo"
+ },
+ {
+  "element": "Water",
+  "name": "Exo Antaeus",
+  "rank": "",
+  "copies": "Atk 1, Sp 1",
+  "source": "Exo"
+ },
+ {
+  "element": "Water",
+  "name": "Exo Ephialtes",
+  "rank": "",
+  "copies": "Atk 1, Sp 1",
+  "source": "Exo"
+ },
+ {
+  "element": "Earth",
+  "name": "Exo Ashavan",
+  "rank": "",
+  "copies": "Atk 1, Sp 1",
+  "source": "Exo"
+ },
+ {
+  "element": "Earth",
+  "name": "Exo Kshathra",
+  "rank": "",
+  "copies": "Atk 1, Sp 1",
+  "source": "Exo"
+ },
+ {
+  "element": "Light",
+  "name": "Exo Aristarchus",
+  "rank": "",
+  "copies": "Atk 1, Sp 1",
+  "source": "Exo"
+ },
+ {
+  "element": "Light",
+  "name": "Exo Heliocentrum",
+  "rank": "",
+  "copies": "Atk 1, Sp 1",
+  "source": "Exo"
+ },
+ {
+  "element": "Dark",
+  "name": "Exo Evilenes",
+  "rank": "",
+  "copies": "Atk 1, Sp 1",
+  "source": "Exo"
+ },
+ {
+  "element": "Dark",
+  "name": "Exo Hamartia",
+  "rank": "",
+  "copies": "Atk 1, Sp 1",
+  "source": "Exo"
+ },
+ {
+  "element": "Fire",
+  "name": "Sword of Pallas Militis",
+  "rank": "",
+  "copies": "1",
+  "source": "Militis"
+ },
+ {
+  "element": "Fire",
+  "name": "Wrathfire Militis",
+  "rank": "",
+  "copies": "1",
+  "source": "Militis"
+ },
+ {
+  "element": "Wind",
+  "name": "Arkab Prior Militis",
+  "rank": "",
+  "copies": "1",
+  "source": "Militis"
+ },
+ {
+  "element": "Wind",
+  "name": "Indra's Edge Militis",
+  "rank": "",
+  "copies": "2",
+  "source": "Militis"
+ },
+ {
+  "element": "Wind",
+  "name": "Plume of Suparna Militis",
+  "rank": "",
+  "copies": "1",
+  "source": "Militis"
+ },
+ {
+  "element": "Water",
+  "name": "Glacial Militis",
+  "rank": "",
+  "copies": "1",
+  "source": "Militis"
+ },
+ {
+  "element": "Water",
+  "name": "Wilhelm Militis",
+  "rank": "",
+  "copies": "2",
+  "source": "Militis"
+ },
+ {
+  "element": "Earth",
+  "name": "Solomon's Axe Militis",
+  "rank": "",
+  "copies": "1",
+  "source": "Militis"
+ },
+ {
+  "element": "Earth",
+  "name": "Tribunal Lyre Militis",
+  "rank": "",
+  "copies": "1",
+  "source": "Militis"
+ },
+ {
+  "element": "Light",
+  "name": "Heliogabalus Militis",
+  "rank": "",
+  "copies": "1",
+  "source": "Militis"
+ },
+ {
+  "element": "Dark",
+  "name": "Ramsund Militis",
+  "rank": "",
+  "copies": "2",
+  "source": "Militis"
+ },
+ {
+  "element": "Dark",
+  "name": "Vynateya Militis",
+  "rank": "",
+  "copies": "1",
+  "source": "Militis"
+ },
+ {
+  "element": "Fire",
+  "name": "Heat of The Sun",
+  "rank": "",
+  "copies": "",
+  "source": "New World Foundation"
+ },
+ {
+  "element": "Fire",
+  "name": "Kiss of The Devil",
+  "rank": "",
+  "copies": "",
+  "source": "New World Foundation"
+ },
+ {
+  "element": "Wind",
+  "name": "Melody of Judgement",
+  "rank": "",
+  "copies": "",
+  "source": "New World Foundation"
+ },
+ {
+  "element": "Wind",
+  "name": "Theater of Temperance",
+  "rank": "",
+  "copies": "",
+  "source": "New World Foundation"
+ },
+ {
+  "element": "Water",
+  "name": "Reflection of The Moon",
+  "rank": "",
+  "copies": "",
+  "source": "New World Foundation"
+ },
+ {
+  "element": "Earth",
+  "name": "Binds of The Hanged Man",
+  "rank": "",
+  "copies": "",
+  "source": "New World Foundation"
+ },
+ {
+  "element": "Light",
+  "name": "Shooting of The Star",
+  "rank": "",
+  "copies": "",
+  "source": "New World Foundation"
+ },
+ {
+  "element": "Dark",
+  "name": "Pain of Death",
+  "rank": "",
+  "copies": "",
+  "source": "New World Foundation"
+ },
+ {
+  "element": "Wind",
+  "name": "Daur da Blao",
+  "rank": "",
+  "copies": "200 daily pts / 4,500 Prestige Pendant",
+  "source": "Proven"
+ },
+ {
+  "element": "Light",
+  "name": "Phantom Fangs",
+  "rank": "",
+  "copies": "200 daily pts / 4,500 Prestige Pendant",
+  "source": "Proven"
+ },
+ {
+  "element": "Fire",
+  "name": "Garnet Broadaxe",
+  "rank": "",
+  "copies": "",
+  "source": "Beast"
+ },
+ {
+  "element": "Wind",
+  "name": "Peridot Crossbow",
+  "rank": "",
+  "copies": "",
+  "source": "Beast"
+ },
+ {
+  "element": "Water",
+  "name": "Aquamarine Hatchet",
+  "rank": "",
+  "copies": "",
+  "source": "Beast"
+ },
+ {
+  "element": "Water",
+  "name": "Winter's Frostnettle",
+  "rank": "",
+  "copies": "",
+  "source": "Beast"
+ },
+ {
+  "element": "Earth",
+  "name": "Zircon Edge",
+  "rank": "",
+  "copies": "",
+  "source": "Beast"
+ },
+ {
+  "element": "Light",
+  "name": "Vital Arc",
+  "rank": "",
+  "copies": "",
+  "source": "Beast"
+ },
+ {
+  "element": "Dark",
+  "name": "Stygian Claw",
+  "rank": "",
+  "copies": "",
+  "source": "Beast"
+ },
+ {
+  "element": "Fire",
+  "name": "Sol Remnant",
+  "rank": "",
+  "copies": "",
+  "source": "Astral"
+ },
+ {
+  "element": "Fire",
+  "name": "Crimson Scale",
+  "rank": "",
+  "copies": "2",
+  "source": "Premium"
+ },
+ {
+  "element": "Fire",
+  "name": "Higurashi",
+  "rank": "",
+  "copies": "",
+  "source": "Premium"
+ },
+ {
+  "element": "Fire",
+  "name": "Nebula Gauntlets",
+  "rank": "",
+  "copies": "2",
+  "source": "Premium"
+ },
+ {
+  "element": "Fire",
+  "name": "Phoenix's Torch",
+  "rank": "",
+  "copies": "MH Mainhand Only",
+  "source": "Premium"
+ },
+ {
+  "element": "Fire",
+  "name": "Sennen Goji",
+  "rank": "",
+  "copies": "2",
+  "source": "Premium"
+ },
+ {
+  "element": "Wind",
+  "name": "Aetherial Maverick",
+  "rank": "",
+  "copies": "2",
+  "source": "Premium"
+ },
+ {
+  "element": "Wind",
+  "name": "Cla\u00edomh Solais D\u00edon",
+  "rank": "",
+  "copies": "1",
+  "source": "Premium"
+ },
+ {
+  "element": "Wind",
+  "name": "Evanescence",
+  "rank": "",
+  "copies": "MH Mainhand Only. This weapon should not be used as a grid piece.",
+  "source": "Premium"
+ },
+ {
+  "element": "Wind",
+  "name": "Galgalim of Gales",
+  "rank": "",
+  "copies": "MH Mainhand Only. This weapon should not be used as a grid piece.",
+  "source": "Premium"
+ },
+ {
+  "element": "Wind",
+  "name": "Piercing Galewing",
+  "rank": "",
+  "copies": "2",
+  "source": "Premium"
+ },
+ {
+  "element": "Wind",
+  "name": "Rhomphaia",
+  "rank": "",
+  "copies": "",
+  "source": "Premium"
+ },
+ {
+  "element": "Wind",
+  "name": "Swan",
+  "rank": "",
+  "copies": "MH Mainhand Only. This weapon should not be used as a grid piece.",
+  "source": "Premium"
+ },
+ {
+  "element": "Water",
+  "name": "Gospel of Water and Sky",
+  "rank": "",
+  "copies": "2",
+  "source": "Premium"
+ },
+ {
+  "element": "Water",
+  "name": "Hraesvelgr",
+  "rank": "",
+  "copies": "",
+  "source": "Premium"
+ },
+ {
+  "element": "Water",
+  "name": "Shishio",
+  "rank": "",
+  "copies": "",
+  "source": "Premium"
+ },
+ {
+  "element": "Earth",
+  "name": "Andromeda",
+  "rank": "",
+  "copies": "",
+  "source": "Premium"
+ },
+ {
+  "element": "Earth",
+  "name": "Hrunting",
+  "rank": "",
+  "copies": "",
+  "source": "Premium"
+ },
+ {
+  "element": "Earth",
+  "name": "Landslide Scepter",
+  "rank": "",
+  "copies": "1",
+  "source": "Premium"
+ },
+ {
+  "element": "Earth",
+  "name": "Pillardriver",
+  "rank": "",
+  "copies": "2",
+  "source": "Premium"
+ },
+ {
+  "element": "Light",
+  "name": "Canifortis",
+  "rank": "",
+  "copies": "2",
+  "source": "Premium"
+ },
+ {
+  "element": "Light",
+  "name": "Harmonia",
+  "rank": "",
+  "copies": "2",
+  "source": "Premium"
+ },
+ {
+  "element": "Light",
+  "name": "White Sword of Splendor",
+  "rank": "",
+  "copies": "2",
+  "source": "Premium"
+ },
+ {
+  "element": "Dark",
+  "name": "Ereshkigal",
+  "rank": "",
+  "copies": "",
+  "source": "Premium"
+ },
+ {
+  "element": "Dark",
+  "name": "Executioner",
+  "rank": "",
+  "copies": "2",
+  "source": "Premium"
+ },
+ {
+  "element": "Dark",
+  "name": "Pain and Suffering",
+  "rank": "",
+  "copies": "2",
+  "source": "Premium"
+ }
+]

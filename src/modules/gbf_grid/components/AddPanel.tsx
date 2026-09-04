@@ -1,10 +1,9 @@
 import { useState } from "react";
-import type { Weapon, Element, Category } from "../data";
-import { ELEMENTS, CATEGORIES, defaultWeaponForm } from "../data";
+import type { Weapon, Element } from "../data";
+import { ELEMENTS, GROUPS, defaultWeaponForm } from "../data";
 
 interface Props {
-  element: Element;
-  category: Category;
+  source: string;
   saving: boolean;
   onAdd: (form: Omit<Weapon, "id">) => void;
   onCancel: () => void;
@@ -16,8 +15,8 @@ const inputStyle = { border: "1px solid #d0d0d0", background: "#fff", color: "#1
 const selStyle = { border: "1px solid #d0d0d0", background: "#fff", color: "#1a1a1a", padding: "5px 6px", borderRadius: "5px", fontSize: "12px", cursor: "pointer", width: "100%", minWidth: 0 };
 const btnStyle = (color: string, bg: string, border: string) => ({ background: bg, color, border: `1px solid ${border}`, padding: "6px 14px", borderRadius: "6px", fontSize: "12px", fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" as const });
 
-export function AddPanel({ element, category, saving, onAdd, onCancel }: Props) {
-  const [form, setForm] = useState(defaultWeaponForm(element, category));
+export function AddPanel({ source, saving, onAdd, onCancel }: Props) {
+  const [form, setForm] = useState(defaultWeaponForm(source));
 
   return (
     <div style={{ background: "#f0fff4", border: "1px solid #a8e6c0", borderRadius: "8px", padding: "16px", marginBottom: "12px" }}>
@@ -30,28 +29,24 @@ export function AddPanel({ element, category, saving, onAdd, onCancel }: Props) 
             onKeyDown={e => { if (e.key === "Enter" && form.name.trim()) onAdd(form); if (e.key === "Escape") onCancel(); }} />
         </div>
         <div style={fieldStyle}>
+          <label style={labelStyle}>Group</label>
+          <select style={selStyle} value={form.source} onChange={e => setForm({ ...form, source: e.target.value })}>
+            {GROUPS.map(g => <option key={g}>{g}</option>)}
+          </select>
+        </div>
+        <div style={fieldStyle}>
           <label style={labelStyle}>Element</label>
           <select style={selStyle} value={form.element} onChange={e => setForm({ ...form, element: e.target.value as Element })}>
             {ELEMENTS.map(el => <option key={el}>{el}</option>)}
           </select>
         </div>
         <div style={fieldStyle}>
-          <label style={labelStyle}>Category</label>
-          <select style={selStyle} value={form.category} onChange={e => setForm({ ...form, category: e.target.value as Category })}>
-            {CATEGORIES.map(c => <option key={c}>{c}</option>)}
-          </select>
-        </div>
-        <div style={fieldStyle}>
           <label style={labelStyle}>Rank</label>
-          <input style={inputStyle} placeholder="151" value={form.rank} onChange={e => setForm({ ...form, rank: e.target.value })} />
+          <input style={inputStyle} placeholder="—" value={form.rank} onChange={e => setForm({ ...form, rank: e.target.value })} />
         </div>
         <div style={fieldStyle}>
           <label style={labelStyle}>Copies</label>
-          <input style={inputStyle} placeholder="1–2" value={form.copies} onChange={e => setForm({ ...form, copies: e.target.value })} />
-        </div>
-        <div style={{ ...fieldStyle, minWidth: "140px" }}>
-          <label style={labelStyle}>Source</label>
-          <input style={inputStyle} placeholder="Omega Rebirth" value={form.source} onChange={e => setForm({ ...form, source: e.target.value })} />
+          <input style={inputStyle} placeholder="2" value={form.copies} onChange={e => setForm({ ...form, copies: e.target.value })} />
         </div>
       </div>
       <div style={{ display: "flex", gap: "8px" }}>
