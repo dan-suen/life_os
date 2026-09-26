@@ -57,7 +57,16 @@ export default function CommitmentsModule() {
   function getAreaItems(area: Area): Commitment[] {
     return filtered
       .filter(c => c.area === area && c.tier !== "Urgent")
-      .sort((a, b) => calcPriority(b, settings) - calcPriority(a, settings));
+      .sort((a, b) => {
+        // A firm deadline should dominate the sort — soonest due date first,
+        // ahead of anything without one. calcPriority only breaks ties.
+        if (a.deadline && b.deadline) {
+          return a.deadline.localeCompare(b.deadline) || calcPriority(b, settings) - calcPriority(a, settings);
+        }
+        if (a.deadline) return -1;
+        if (b.deadline) return 1;
+        return calcPriority(b, settings) - calcPriority(a, settings);
+      });
   }
 
   function handleEdit(c: Commitment) {
