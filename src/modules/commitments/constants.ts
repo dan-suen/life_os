@@ -14,6 +14,7 @@ export const AREA_COLORS: Record<Area, string> = {
   "Health & Fitness":               "#1a9e5c",
   "Personal Projects & Hobbies":    "#b07d00",
   "Finances":                       "#7c3aed",
+  "School":                         "#0e7490",
 };
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -22,6 +23,7 @@ export const DEFAULT_SETTINGS: Settings = {
     "Health & Fitness": 2,
     "Personal Projects & Hobbies": 2,
     "Finances": 2,
+    "School": 3,
   },
   weights: { impact: 0.4, effort: 0.2, urgency: 0.4 },
   currentEnergy: "Medium",

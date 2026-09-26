@@ -1,4 +1,4 @@
-export const AREAS = ["Work / Career", "Health & Fitness", "Personal Projects & Hobbies", "Finances"] as const;
+export const AREAS = ["Work / Career", "Health & Fitness", "Personal Projects & Hobbies", "Finances", "School"] as const;
 export const TIERS = ["Urgent", "Daily", "Weekly", "High Priority", "Normal", "Non-Priority"] as const;
 export const EFFORTS = ["Low", "Medium", "High"] as const;
 export const IMPACTS = ["Low", "Medium", "High"] as const;
