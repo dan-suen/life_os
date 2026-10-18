@@ -57,7 +57,10 @@ export const sortStages = (stages: Stage[]) =>
 export const STONES = ["Sabre", "Dagger", "Spear", "Axe", "Staff", "Gun", "Melee", "Bow", "Harp", "Katana"].map(t => `${t} Stone`);
 export const QUARTZ = ["Fire", "Water", "Earth", "Wind", "Light", "Dark"].map(e => `${e} Quartz`);
 /** Anima options; extended as each group's data is entered (current gbf.wiki names). */
-export const ANIMA = ["Horus Anima", "Horus Omega Anima"];
+export const ANIMA = [
+  "Horus Anima", "Horus Omega Anima",
+  "Metatron Omega Anima", "Michael Anima", "Raphael Anima",
+];
 
 /** Materials still needed for one copy. */
 export function copyRemaining(w: Weapon, c: CopyProgress): Mats {

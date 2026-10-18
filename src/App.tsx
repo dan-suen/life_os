@@ -12,7 +12,7 @@ const MODULES: { id: ModuleId; label: string }[] = [
 ];
 
 export default function App() {
-  const [active, setActive] = useState<ModuleId>("commitments");
+  const [active, setActive] = useState<ModuleId>("gbf");
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       <nav style={{ background: "#1a1a1a", padding: "0 32px", display: "flex", alignItems: "center", gap: "4px", flexShrink: 0 }}>
