@@ -60,6 +60,7 @@ export const QUARTZ = ["Fire", "Water", "Earth", "Wind", "Light", "Dark"].map(e 
 export const ANIMA = [
   "Horus Anima", "Horus Omega Anima",
   "Metatron Omega Anima", "Michael Anima", "Raphael Anima",
+  "Credo Omega Anima", "Luminiera Omega Anima",
 ];
 
 /** Materials still needed for one copy. */
