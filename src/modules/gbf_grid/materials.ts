@@ -61,6 +61,7 @@ export const ANIMA = [
   "Horus Anima", "Horus Omega Anima",
   "Metatron Omega Anima", "Michael Anima", "Raphael Anima",
   "Credo Omega Anima", "Luminiera Omega Anima",
+  "Qilin Omega Anima", "Huanglong Omega Anima",
 ];
 
 /** Materials still needed for one copy. */
