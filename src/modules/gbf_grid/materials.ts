@@ -59,7 +59,7 @@ export const isSkillStage = (key: string) => key === "Skill";
 export const sortStages = (stages: Stage[]) =>
   [...stages].sort((a, b) => STAGE_KEYS.indexOf(a.key as never) - STAGE_KEYS.indexOf(b.key as never));
 
-export const STONES = ["Sword", "Dagger", "Spear", "Axe", "Staff", "Gun", "Melee", "Bow", "Harp", "Katana"].map(t => `${t} Stone`);
+export const STONES = ["Sword", "Dagger", "Spear", "Axe", "Staff", "Pistol", "Melee", "Bow", "Harp", "Katana"].map(t => `${t} Stone`);
 export const QUARTZ = ["Fire", "Water", "Earth", "Wind", "Light", "Dark"].map(e => `${e} Quartz`);
 /** Anima options; extended as each group's data is entered (current gbf.wiki names). */
 export const LUSTERS = ["Ignis", "Aqua", "Terra", "Ventus"].map(e => `${e} Luster`);
