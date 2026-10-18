@@ -1,9 +1,9 @@
 import type { AwakenType, CopyProgress, Mats, Stage, Weapon } from "./data";
 
-export type MatCategory = "Weapon Copy" | "Stone" | "Quartz" | "Anima" | "Pendant" | "Luster" | "Star Fragment" | "New World Quartz" | "Gold Brick" | "Eternity Sand";
-export const MAT_CATEGORIES: MatCategory[] = ["Weapon Copy", "Stone", "Quartz", "Anima", "Pendant", "Luster", "Star Fragment", "New World Quartz", "Gold Brick", "Eternity Sand"];
-/** Single-item categories: the category name is the material name. "Weapon Copy" = a duplicate fed in for a 1★–3★ uncap. */
-const SINGLE: MatCategory[] = ["Weapon Copy", "New World Quartz", "Gold Brick", "Eternity Sand"];
+export type MatCategory = "Stone" | "Quartz" | "Anima" | "Pendant" | "Luster" | "Star Fragment" | "New World Quartz" | "Gold Brick" | "Eternity Sand";
+export const MAT_CATEGORIES: MatCategory[] = ["Stone", "Quartz", "Anima", "Pendant", "Luster", "Star Fragment", "New World Quartz", "Gold Brick", "Eternity Sand"];
+/** Single-item categories: the category name is the material name. */
+const SINGLE: MatCategory[] = ["New World Quartz", "Gold Brick", "Eternity Sand"];
 
 export function matCategory(name: string): MatCategory | null {
   if (SINGLE.includes(name as MatCategory)) return name as MatCategory;

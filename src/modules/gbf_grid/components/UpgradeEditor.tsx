@@ -8,7 +8,7 @@ const link: React.CSSProperties = { fontSize: "11px", color: "#2253c7", cursor: 
 const box: React.CSSProperties = { background: "#fff", border: "1px solid #eee", borderRadius: "6px", padding: "10px 12px", display: "flex", flexDirection: "column", gap: "8px" };
 
 const VARIANTS = {
-  "Weapon Copy": ["Weapon Copy"], Stone: STONES, Quartz: QUARTZ, Anima: ANIMA, Pendant: PENDANTS, Luster: LUSTERS, "Star Fragment": STAR_FRAGMENTS,
+  Stone: STONES, Quartz: QUARTZ, Anima: ANIMA, Pendant: PENDANTS, Luster: LUSTERS, "Star Fragment": STAR_FRAGMENTS,
   "New World Quartz": ["New World Quartz"], "Gold Brick": ["Gold Brick"], "Eternity Sand": ["Eternity Sand"],
 } as const;
 type Kind = keyof typeof VARIANTS;
