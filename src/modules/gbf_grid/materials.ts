@@ -64,8 +64,8 @@ export function sortedMats(mats: Mats): [string, number][] {
 
 export const fmt = (n: number) => n.toLocaleString("en-US");
 
-/** Stage order within a copy. 0★ = obtaining the copy itself; Craft = forging from a base weapon (e.g. Atma → Ultima, Rusted → Bahamut); Nova/Coda = Bahamut upgrades; Forge = Mk II forge (per-copy, skippable); D1–D4 = Evoker Domain bonuses (any order, needed for 5★); 4th Skill = Evoker World card; T1–T5 = transcendence stages. "Skill" = skill fully levelled (a toggle, no materials tracked). */
-export const STAGE_KEYS = ["0★", "Craft", "Nova", "Coda", "1★", "2★", "3★", "4★", "D1", "D2", "D3", "D4", "5★", "6★", "T1", "T2", "T3", "T4", "T5", "Forge", "4th Skill", "Skill", "Awaken"] as const;
+/** Stage order within a copy. 0★ = obtaining the copy itself; Craft = forging from a base weapon (e.g. Atma → Ultima, Rusted → Bahamut); Nova/Coda = Bahamut upgrades; Forge = Mk II forge (per-copy, skippable); R1–R5 = Eternal Radiance levels; D1–D4 = Evoker Domain bonuses (any order, needed for 5★); 4th Skill = Evoker World card; T1–T5 = transcendence stages. "Skill" = skill fully levelled (a toggle, no materials tracked). */
+export const STAGE_KEYS = ["0★", "Craft", "Nova", "Coda", "1★", "2★", "3★", "4★", "D1", "D2", "D3", "D4", "5★", "6★", "T1", "T2", "T3", "T4", "T5", "R1", "R2", "R3", "R4", "R5", "Forge", "4th Skill", "Skill", "Awaken"] as const;
 export const isSkillStage = (key: string) => key === "Skill";
 export const sortStages = (stages: Stage[]) =>
   [...stages].sort((a, b) => STAGE_KEYS.indexOf(a.key as never) - STAGE_KEYS.indexOf(b.key as never));
@@ -96,15 +96,23 @@ export const ANIMA = [
   ...["Ifrit", "Cocytus", "Vohu Manah", "Sagittarius", "Corow", "Diablo"].flatMap(b => [`True Exo ${b} Anima`, `True Xeno ${b} Anima`]),
 ];
 
-/** Uncaps are sequential: ticking 5★ also ticks the lower uncaps this copy has, unticking 4★ also unticks 5★/6★. Skill/Awaken are independent. */
-const UNCAPS = ["0★", "Craft", "Nova", "Coda", "1★", "2★", "3★", "4★", "5★", "6★", "T1", "T2", "T3", "T4", "T5", "Forge"];
-export function toggleStage(done: string[], key: string, available: string[] = [...UNCAPS]): string[] {
-  const tier = UNCAPS.indexOf(key);
+/**
+ * Sequential chains: ticking a stage also ticks the earlier stages of its chain that this copy has;
+ * unticking one also unticks the later ones. Uncaps/transcendence are one chain, Eternal Radiance another.
+ * Skill, Awaken, Domain bonuses and 4th Skill are independent.
+ */
+const CHAINS = [
+  ["0★", "Craft", "Nova", "Coda", "1★", "2★", "3★", "4★", "5★", "6★", "T1", "T2", "T3", "T4", "T5", "Forge"],
+  ["R1", "R2", "R3", "R4", "R5"],
+];
+export function toggleStage(done: string[], key: string, available: string[] = CHAINS.flat()): string[] {
+  const chain = CHAINS.find(c => c.includes(key));
+  const tier = chain ? chain.indexOf(key) : -1;
   if (done.includes(key)) {
-    const drop = tier < 0 ? [key] : UNCAPS.slice(tier);
+    const drop = chain ? chain.slice(tier) : [key];
     return done.filter(k => !drop.includes(k));
   }
-  const add = tier < 0 ? [key] : UNCAPS.slice(0, tier + 1).filter(k => available.includes(k));
+  const add = chain ? chain.slice(0, tier + 1).filter(k => available.includes(k)) : [key];
   return [...done, ...add.filter(k => !done.includes(k))];
 }
 
