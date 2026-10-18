@@ -64,6 +64,18 @@ export const ANIMA = [
   "Qilin Omega Anima", "Huanglong Omega Anima",
 ];
 
+/** Uncaps are sequential: ticking 5★ also ticks 4★, unticking 4★ also unticks 5★/6★. Skill/Awaken are independent. */
+const UNCAPS = ["4★", "5★", "6★"];
+export function toggleStage(done: string[], key: string): string[] {
+  const tier = UNCAPS.indexOf(key);
+  if (done.includes(key)) {
+    const drop = tier < 0 ? [key] : UNCAPS.slice(tier);
+    return done.filter(k => !drop.includes(k));
+  }
+  const add = tier < 0 ? [key] : UNCAPS.slice(0, tier + 1);
+  return [...done, ...add.filter(k => !done.includes(k))];
+}
+
 /** Materials still needed for one copy. */
 export function copyRemaining(w: Weapon, c: CopyProgress): Mats {
   const out: Mats = {};

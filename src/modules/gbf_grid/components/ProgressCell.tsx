@@ -1,5 +1,5 @@
 import { AWAKEN_TYPES, type AwakenType, type CopyProgress, type Stage } from "../data";
-import { isAwakenStage } from "../materials";
+import { isAwakenStage, toggleStage } from "../materials";
 
 const chip = (done: boolean, awaken: boolean): React.CSSProperties => ({
   padding: "2px 8px", borderRadius: "10px", fontSize: "11px", cursor: "pointer", userSelect: "none",
@@ -20,9 +20,7 @@ export function AwakenSelect({ copy, onChange }: { copy: CopyProgress; onChange:
 
 /** A toggle per stage for one copy; awakening stages are gold. */
 export function StageChips({ stages, copy, onChange }: { stages: Stage[]; copy: CopyProgress; onChange: (c: CopyProgress) => void }) {
-  const toggle = (key: string) => onChange({
-    ...copy, done: copy.done.includes(key) ? copy.done.filter(k => k !== key) : [...copy.done, key],
-  });
+  const toggle = (key: string) => onChange({ ...copy, done: toggleStage(copy.done, key) });
   return (
     <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
       {stages.map(st => (
