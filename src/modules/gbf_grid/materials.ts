@@ -1,4 +1,4 @@
-import type { AwakenType, CopyProgress, Mats, Stage, Weapon } from "./data";
+import { bfValue, type AwakenType, type BefoulmentType, type CopyProgress, type Mats, type Stage, type Weapon } from "./data";
 
 export type MatCategory = "Stone" | "Quartz" | "Anima" | "Pendant" | "Luster" | "Star Fragment" | "New World Quartz" | "Gold Brick" | "Eternity Sand";
 export const MAT_CATEGORIES: MatCategory[] = ["Stone", "Quartz", "Anima", "Pendant", "Luster", "Star Fragment", "New World Quartz", "Gold Brick", "Eternity Sand"];
@@ -117,6 +117,19 @@ export function copyRemaining(w: Weapon, c: CopyProgress): Mats {
   const out: Mats = {};
   for (const st of stagesFor(w, c)) if (!c.done.includes(st.key)) addMats(out, st.mats);
   return out;
+}
+
+/** Befoulment % used per type by in-grid copies of an element's weapons. */
+export function bfUsage(weapons: Weapon[], element: string): Partial<Record<BefoulmentType, number>> {
+  const used: Partial<Record<BefoulmentType, number>> = {};
+  for (const w of weapons) {
+    if (w.element !== element) continue;
+    for (const c of copiesOf(w)) {
+      if (!c.bf || c.bf.grid === false) continue;
+      used[c.bf.type] = (used[c.bf.type] ?? 0) + bfValue(c.bf.type, c.bf.prm, c.bf.exo);
+    }
+  }
+  return used;
 }
 
 /** Copies text that isn't a copy plan (e.g. Proven shop prices) is shown as a note. */

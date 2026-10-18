@@ -18,34 +18,50 @@ export interface CopyProgress {
   awaken: AwakenType;
   /** Stage keys this copy skips, e.g. "Forge" on an unforged Revans copy. */
   skip?: string[];
+  /** The befoulment this copy rolled (Odious). */
+  bf?: CopyBf;
+}
+
+/** A rolled befoulment: type, permeation (1–6), exorcision level (1–5), and whether the copy is in the grid. */
+export interface CopyBf {
+  type: BefoulmentType;
+  prm: number;
+  exo: number;
+  /** Counted against the element's budget; defaults to true. */
+  grid?: boolean;
 }
 
 /** Befoulment types (gbf.wiki Befoulments). */
 export type BefoulmentType = "ATK" | "DSR" | "Skill" | "DEF" | "HP" | "C.A." | "M.A." | "Turn";
 export const BEFOULMENTS: BefoulmentType[] = ["DSR", "ATK", "Skill", "DEF", "HP", "C.A.", "M.A.", "Turn"];
 /**
- * Befoulment budget for any deployed grid (C.A.-preferring setup). Values are gbf.wiki Lvl-1 ranges
- * (Prm 1 → Prm 6), linearly interpolated, minus the average Lvl-5 exorcision reduction.
- * maxPrm: worst permeation worth keeping on a piece; maxInGrid: how many the grid can carry.
- * Types not listed here (C.A., M.A., Turn) are never taken.
+ * Per-element grid budget: the most total % of each befoulment one grid should carry
+ * (C.A.-preferring setup). Types not listed (C.A., M.A., Turn) are never taken.
+ * ≈ 3 DSR at Prm 3, 2 ATK at Prm 2, 2 Skill at Prm 1 / 1 at Prm 3, 1 DEF at Prm 2, 1 HP at Prm 1 (all exorcised to Lvl 5).
  */
-export const BF_BUDGET: Partial<Record<BefoulmentType, { maxPrm: number; maxInGrid: number; note?: string }>> = {
-  DSR:   { maxPrm: 3, maxInGrid: 3 },
-  ATK:   { maxPrm: 2, maxInGrid: 2 },
-  Skill: { maxPrm: 3, maxInGrid: 2, note: "2 only if both Prm 1, otherwise 1" },
-  DEF:   { maxPrm: 2, maxInGrid: 1 },
-  HP:    { maxPrm: 1, maxInGrid: 1 },
-};
+export const BF_CAP: Partial<Record<BefoulmentType, number>> = { DSR: 24, ATK: 12, Skill: 28, DEF: 13, HP: 14 };
+/** Worst permeation worth keeping on any single piece, so one bad roll can't eat a whole budget. */
+export const BF_PIECE_MAX_PRM: Partial<Record<BefoulmentType, number>> = { DSR: 4, ATK: 3, Skill: 3, DEF: 2, HP: 1 };
 const BF_RANGE: Record<BefoulmentType, [number, number]> = {
   ATK: [6, 16], DSR: [6, 16], Turn: [6, 16], DEF: [13, 33], "M.A.": [10, 25], Skill: [22, 50], "C.A.": [22, 50], HP: [22, 50],
 };
 const BF_EXO_AVG: Record<BefoulmentType, number> = {
   ATK: 0.6, DSR: 0.6, Turn: 0.6, DEF: 1.2, "M.A.": 1.0, Skill: 2.0, "C.A.": 2.0, HP: 2.0,
 };
-/** Estimated befoulment % at a permeation, after exorcising to `exo` (1–5). */
+/**
+ * Estimated befoulment % at a permeation, after exorcising to `exo` (1–5). gbf.wiki gives the Prm 1 and
+ * Prm 6 Lvl-1 values; steps between are interpolated, and exorcision uses the average reduction roll.
+ */
 export function bfValue(t: BefoulmentType, prm: number, exo = 5): number {
   const [lo, hi] = BF_RANGE[t];
   return Math.max(0, lo + (hi - lo) * (prm - 1) / 5 - BF_EXO_AVG[t] * (exo - 1));
+}
+
+/** Worst permeation (up to the per-piece cap) whose value at `exo` still fits in `room` %, or 0 if none does. */
+export function maxPrmFitting(t: BefoulmentType, room: number, exo = 5): number {
+  let best = 0;
+  for (let p = 1; p <= (BF_PIECE_MAX_PRM[t] ?? 0); p++) if (bfValue(t, p, exo) <= room + 1e-9) best = p;
+  return best;
 }
 
 /** Weapon-level befoulment notes: BF types that undercut this weapon's own skills. */

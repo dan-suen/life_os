@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { BF_BUDGET, ELEMENT_META, GROUPS, bfValue, type BefoulmentType, type CopyProgress, type Element, type Mats, type Weapon } from "./data";
+import { BF_CAP, ELEMENT_META, GROUPS, type BefoulmentType, type CopyProgress, type Element, type Mats, type Weapon } from "./data";
 import { useGbfGrid } from "./hooks/useGbfGrid";
 import { useWeapons } from "./hooks/useWeapons";
 import { AddPanel } from "./components/AddPanel";
 import { EditPanel } from "./components/EditPanel";
-import { AwakenSelect, BfRange, StageChips } from "./components/ProgressCell";
+import { AwakenSelect, BfEditor, BfRange, StageChips } from "./components/ProgressCell";
 import { MatList } from "./components/MatList";
 import { MaterialsView } from "./components/MaterialsView";
-import { addMats, copiesNote, copiesOf, copyRemaining, copyRemainingExtra, remainingExtra, remainingMats } from "./materials";
+import { addMats, bfUsage, copiesNote, copiesOf, copyRemaining, copyRemainingExtra, remainingExtra, remainingMats } from "./materials";
 
 type ElementFilter = Element | "All";
 const MATERIALS_TAB = "Σ Materials";
@@ -44,6 +44,9 @@ export default function GbfGridModule() {
   const viewRemaining: Mats = {};
   const viewExtra: Mats = {};
   for (const w of weapons) { addMats(viewRemaining, remainingMats(w)); addMats(viewExtra, remainingExtra(w)); }
+  // Befoulment budget is per element, counted over all of that element's weapons in the group.
+  const bfElements = Array.from(new Set(groupWeapons.map(w => w.element))).filter(el => weapons.some(w => w.element === el));
+  const bfUsed = Object.fromEntries(bfElements.map(el => [el, bfUsage(groupWeapons, el)]));
 
 
   async function handleAdd(form: Omit<Weapon, "id">) {
@@ -135,13 +138,19 @@ export default function GbfGridModule() {
               </span>
               {weapons.some(w => w.stages?.length) ? <MatList mats={viewRemaining} extras={viewExtra} /> : <span style={{ fontSize: "12px", color: "#bbb" }}>No stage data yet</span>}
               {activeGroup === "Odious" && (
-                <span style={{ marginLeft: "auto", fontSize: "12px", color: "#555", maxWidth: "460px" }}>
-                  <span style={{ fontSize: "11px", fontWeight: 600, color: "#888", textTransform: "uppercase", letterSpacing: "0.05em", marginRight: "6px" }}>Grid BF budget</span>
-                  {(Object.entries(BF_BUDGET) as [BefoulmentType, { maxPrm: number; maxInGrid: number; note?: string }][]).map(([t, b]) =>
-                    `${t} ×${b.maxInGrid} (Prm ≤${b.maxPrm}, ~${Math.round(bfValue(t, b.maxPrm))}% each)${b.note ? ` — ${b.note}` : ""}`).join(" · ")}
-                  {" · no C.A., M.A., Turn"}
-                  <div style={{ fontSize: "11px", color: "#999" }}>Spread across the whole grid; values assume exorcision Lvl 5.</div>
-                </span>
+                <div style={{ marginLeft: "auto", fontSize: "12px", color: "#555", display: "flex", flexDirection: "column", gap: "2px" }}>
+                  <span style={{ fontSize: "11px", fontWeight: 600, color: "#888", textTransform: "uppercase", letterSpacing: "0.05em" }}>Grid BF budget (in-grid copies)</span>
+                  {bfElements.map(el => (
+                    <span key={el}>
+                      <span style={{ ...elementStyle(el), fontSize: "10px", padding: "0 5px", marginRight: "6px" }}>{el}</span>
+                      {(Object.entries(BF_CAP) as [BefoulmentType, number][]).map(([t, cap]) => {
+                        const u = bfUsed[el]?.[t] ?? 0;
+                        return <span key={t} style={{ marginRight: "8px", color: u > cap + 1e-9 ? "#b03a2e" : u > 0 ? "#1a1a1a" : "#aaa" }}>{t} {Math.round(u)}/{cap}%</span>;
+                      })}
+                    </span>
+                  ))}
+                  <span style={{ fontSize: "11px", color: "#999" }}>No C.A., M.A. or Turn. Untaken pieces assume exorcision Lvl 5.</span>
+                </div>
               )}
             </div>
             <table style={{ width: "100%", borderCollapse: "collapse", background: "#fff", borderRadius: "8px", overflow: "hidden", boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
@@ -177,6 +186,7 @@ export default function GbfGridModule() {
                           <span style={forgeBadge(!copies[j].skip?.includes("Forge"))}>{copies[j].skip?.includes("Forge") ? "Unforged" : "Mk II"}</span>
                         )}
                         <AwakenSelect copy={copies[j]} onChange={c => setCopy(j, c)} />
+                        {isOdious && <div style={{ marginTop: "3px" }}><BfEditor copy={copies[j]} avoid={w.befoulment?.avoid} used={bfUsed[w.element] ?? {}} onChange={c => setCopy(j, c)} /></div>}
                       </td>
                       <td style={{ ...tdStyle(), ...last(j) }}><StageChips stages={w.stages} copy={copies[j]} onChange={c => setCopy(j, c)} /></td>
                       <td style={{ ...tdStyle(), ...last(j) }}><MatList mats={copyRemaining(w, copies[j])} extras={copyRemainingExtra(w, copies[j])} /></td>
@@ -206,7 +216,7 @@ export default function GbfGridModule() {
                             {!note && w.copies && copies.length > 0 && (
                               <div style={{ fontSize: "11px", color: "#888", fontWeight: 400, marginTop: "2px" }}>Goal: {w.copies}</div>
                             )}
-                            {isOdious && <BfRange avoid={w.befoulment?.avoid} />}
+                            {isOdious && <BfRange avoid={w.befoulment?.avoid} used={bfUsed[w.element] ?? {}} />}
                           </td>
                           <td rowSpan={span} style={{ ...tdStyle("center"), ...fade }}>
                             <span style={elementStyle(w.element)}>{w.element}</span>
