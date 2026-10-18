@@ -141,7 +141,7 @@ export default function GbfGridModule() {
                   <th style={thStyle()}>Weapon</th>
                   <th style={thStyle("90px")}>Element</th>
                   <th style={thStyle("70px")}>Rank</th>
-                  <th style={thStyle("110px")}>Copy</th>
+                  <th style={thStyle("150px")}>Copy</th>
                   <th style={thStyle()}>Stages</th>
                   <th style={thStyle("200px")}>Remaining</th>
                   <th style={thStyle("70px")}></th>
@@ -153,6 +153,7 @@ export default function GbfGridModule() {
                   const copies = w.stages?.length ? copiesOf(w) : [];
                   const span = Math.max(copies.length, 1);
                   const note = copiesNote(w.copies);
+                  const hasForge = w.stages?.some(st => st.key === "Forge");
                   const bg = done ? "#f8f8f8" : i % 2 === 0 ? "#fff" : "#fafafa";
                   const fade: React.CSSProperties = { opacity: done ? 0.45 : 1, transition: "opacity 0.1s" };
                   const last = (j: number) => j === span - 1 ? {} : { borderBottom: "1px dashed #eee" };
@@ -161,6 +162,9 @@ export default function GbfGridModule() {
                     <>
                       <td style={{ ...tdStyle(), ...last(j), whiteSpace: "nowrap" }}>
                         <span style={{ fontSize: "11px", color: "#999", marginRight: "6px" }}>#{j + 1}</span>
+                        {hasForge && (
+                          <span style={forgeBadge(!copies[j].skip?.includes("Forge"))}>{copies[j].skip?.includes("Forge") ? "Unforged" : "Mk II"}</span>
+                        )}
                         <AwakenSelect copy={copies[j]} onChange={c => setCopy(j, c)} />
                       </td>
                       <td style={{ ...tdStyle(), ...last(j) }}><StageChips stages={w.stages} copy={copies[j]} onChange={c => setCopy(j, c)} /></td>
@@ -188,6 +192,9 @@ export default function GbfGridModule() {
                             onClick={() => toggle(w.element, w.name)}>
                             {w.name}
                             {note && <div style={{ fontSize: "11px", color: "#999", fontWeight: 400 }}>{note}</div>}
+                            {!note && w.copies && copies.length > 0 && (
+                              <div style={{ fontSize: "11px", color: "#888", fontWeight: 400, marginTop: "2px" }}>Goal: {w.copies}</div>
+                            )}
                           </td>
                           <td rowSpan={span} style={{ ...tdStyle("center"), ...fade }}>
                             <span style={elementStyle(w.element)}>{w.element}</span>
@@ -225,6 +232,14 @@ export default function GbfGridModule() {
       </div>
     </div>
   );
+}
+
+function forgeBadge(forge: boolean): React.CSSProperties {
+  return {
+    display: "inline-block", padding: "1px 6px", borderRadius: "4px", fontSize: "10px", fontWeight: 700,
+    marginRight: "6px", letterSpacing: "0.03em",
+    background: forge ? "#fdecea" : "#f0f0f0", color: forge ? "#b03a2e" : "#888",
+  };
 }
 
 function thStyle(width?: string): React.CSSProperties {
