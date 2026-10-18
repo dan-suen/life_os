@@ -50,4 +50,13 @@ create table if not exists gbf_weapon_extra_mats (
 );
 alter table gbf_weapon_extra_mats disable row level security;
 
+-- In-game stock per material for the Σ Materials tab: owned count + manual "complete" flag.
+create table if not exists gbf_inventory (
+  material text primary key,
+  owned integer not null default 0,
+  complete boolean not null default false,
+  updated_at timestamptz not null default now()
+);
+alter table gbf_inventory disable row level security;
+
 -- Weapons are managed from the app UI; nothing seeds or resets these tables.

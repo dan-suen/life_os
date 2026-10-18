@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ELEMENT_META, type Element, type Weapon } from "../data";
+import { useInventory } from "../hooks/useInventory";
 import { MAT_CATEGORIES, SHARD_TRIALS, type MatCategory, fmt, matCategory, remainingExtra, remainingMats, sortedMats } from "../materials";
 
 interface Props {
@@ -20,6 +21,15 @@ export function MaterialsView({ weapons, groups, elementFilter }: Props) {
   const [showExtra, setShowExtra] = useState(true);
   const hasExtras = weapons.some(w => Object.keys(w.extras ?? {}).length);
   const [open, setOpen] = useState<string | null>(null);
+  const { inventory, error: invError, setError: setInvError, save } = useInventory();
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
+  function commitOwned(name: string) {
+    const raw = drafts[name];
+    if (raw === undefined) return;
+    const n = Math.max(0, Math.floor(Number(raw.replace(/,/g, "")) || 0));
+    setDrafts(d => { const x = { ...d }; delete x[name]; return x; });
+    if (n !== (inventory[name]?.owned ?? 0)) save(name, { owned: n });
+  }
 
   const inScope = weapons.filter(w =>
     !hiddenGroups.has(w.source) &&
@@ -39,7 +49,10 @@ export function MaterialsView({ weapons, groups, elementFilter }: Props) {
     }
   }
   const totals = Object.fromEntries([...byMat].map(([name, list]) => [name, list.reduce((a, x) => a + x.n, 0)]));
-  const rows = sortedMats(totals);
+  // Done = marked complete, or already owning enough. Done rows sink to the bottom, keeping their order.
+  const isDone = (name: string, total: number) => !!inventory[name]?.complete || (inventory[name]?.owned ?? 0) >= total;
+  const sorted = sortedMats(totals);
+  const rows = [...sorted.filter(([n, t]) => !isDone(n, t)), ...sorted.filter(([n, t]) => isDone(n, t))];
 
   const toggleGroup = (g: string) => setHiddenGroups(p => { const n = new Set(p); n.has(g) ? n.delete(g) : n.add(g); return n; });
   const toggleCat = (c: MatCategory) => setCats(p => { const n = new Set(p); n.has(c) ? n.delete(c) : n.add(c); return n; });
@@ -60,29 +73,56 @@ export function MaterialsView({ weapons, groups, elementFilter }: Props) {
         </div>
       </div>
 
+      {invError && (
+        <div style={{ background: "#fff0f0", color: "#c0392b", padding: "8px 12px", fontSize: "12px", borderRadius: "6px", marginBottom: "10px" }}>
+          ⚠ Inventory: {invError}{invError.includes("gbf_inventory") ? " — run the gbf_inventory SQL to enable owned counts." : ""}{" "}
+          <span style={{ cursor: "pointer", textDecoration: "underline" }} onClick={() => setInvError(null)}>dismiss</span>
+        </div>
+      )}
       <table style={{ width: "100%", borderCollapse: "collapse", background: "#fff", borderRadius: "8px", overflow: "hidden", boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
         <thead>
           <tr style={{ background: "#1a1a1a", color: "#fff", fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
             <th style={{ padding: "10px 16px", textAlign: "left" }}>Material</th>
             <th style={{ padding: "10px 16px", textAlign: "left", width: "120px" }}>Type</th>
-            <th style={{ padding: "10px 16px", textAlign: "right", width: "120px" }}>Remaining</th>
-            <th style={{ padding: "10px 16px", textAlign: "right", width: "90px" }}>Weapons</th>
+            <th style={{ padding: "10px 16px", textAlign: "right", width: "110px" }}>Remaining</th>
+            <th style={{ padding: "10px 16px", textAlign: "right", width: "110px" }}>Owned</th>
+            <th style={{ padding: "10px 16px", textAlign: "right", width: "110px" }}>Still need</th>
+            <th style={{ padding: "10px 16px", textAlign: "right", width: "80px" }}>Weapons</th>
+            <th style={{ padding: "10px 16px", textAlign: "center", width: "50px" }} title="Mark complete">✓</th>
           </tr>
         </thead>
         <tbody>
           {rows.map(([name, total]) => {
             const list = byMat.get(name)!;
             const isOpen = open === name;
+            const inv = inventory[name];
+            const owned = inv?.owned ?? 0;
+            const done = isDone(name, total);
+            const need = Math.max(0, total - owned);
             return [
-              <tr key={name} onClick={() => setOpen(isOpen ? null : name)} style={{ cursor: "pointer", borderBottom: "1px solid #f0f0f0" }}>
+              <tr key={name} onClick={() => setOpen(isOpen ? null : name)} style={{ cursor: "pointer", borderBottom: "1px solid #f0f0f0", opacity: done ? 0.45 : 1, background: done ? "#f8f8f8" : undefined }}>
                 <td style={{ padding: "10px 16px", fontSize: "13px", fontWeight: 500 }}>{isOpen ? "▾" : "▸"} {name}
                   {SHARD_TRIALS[name] && (SHARD_TRIALS[name].length
                     ? <span style={{ marginLeft: "8px", fontSize: "11px", color: "#888" }}>{SHARD_TRIALS[name].join(" / ")} Mastery Trial</span>
                     : <span style={{ marginLeft: "8px", fontSize: "11px", fontWeight: 600, padding: "1px 6px", borderRadius: "4px", background: "#fdecea", color: "#b03a2e" }}>not from Mastery Trials</span>)}
                 </td>
                 <td style={{ padding: "10px 16px", fontSize: "12px", color: "#888" }}>{matCategory(name) ?? `${list[0].w.source} (group)`}</td>
-                <td style={{ padding: "10px 16px", fontSize: "13px", fontWeight: 700, textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{fmt(total)}</td>
+                <td style={{ padding: "10px 16px", fontSize: "13px", textAlign: "right", fontVariantNumeric: "tabular-nums", color: "#555" }}>{fmt(total)}</td>
+                <td style={{ padding: "6px 16px", textAlign: "right" }} onClick={e => e.stopPropagation()}>
+                  <input inputMode="numeric" value={drafts[name] ?? (owned ? fmt(owned) : "")} placeholder="0"
+                    onChange={e => setDrafts(d => ({ ...d, [name]: e.target.value }))}
+                    onBlur={() => commitOwned(name)}
+                    onKeyDown={e => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); if (e.key === "Escape") setDrafts(d => { const x = { ...d }; delete x[name]; return x; }); }}
+                    style={{ width: "80px", textAlign: "right", border: "1px solid #ddd", borderRadius: "4px", padding: "3px 6px", fontSize: "12px", fontVariantNumeric: "tabular-nums" }} />
+                </td>
+                <td style={{ padding: "10px 16px", fontSize: "13px", fontWeight: 700, textAlign: "right", fontVariantNumeric: "tabular-nums", color: done ? "#1a9e5c" : "#1a1a1a" }}>
+                  {inv?.complete || need === 0 ? "✓" : fmt(need)}
+                </td>
                 <td style={{ padding: "10px 16px", fontSize: "12px", color: "#888", textAlign: "right" }}>{list.length}</td>
+                <td style={{ padding: "6px 16px", textAlign: "center" }} onClick={e => e.stopPropagation()}>
+                  <input type="checkbox" checked={!!inv?.complete} title="Mark complete" style={{ cursor: "pointer" }}
+                    onChange={e => save(name, { complete: e.target.checked })} />
+                </td>
               </tr>,
               isOpen && list.map(({ w, n }) => (
                 <tr key={`${name}:${w.id}`} style={{ background: "#fafafa", borderBottom: "1px solid #f0f0f0" }}>
@@ -91,13 +131,13 @@ export function MaterialsView({ weapons, groups, elementFilter }: Props) {
                   </td>
                   <td style={{ padding: "6px 16px", fontSize: "11px", color: "#999" }}>{w.source}</td>
                   <td style={{ padding: "6px 16px", fontSize: "12px", textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{fmt(n)}</td>
-                  <td />
+                  <td colSpan={4} />
                 </tr>
               )),
             ];
           })}
           {rows.length === 0 && (
-            <tr><td colSpan={4} style={{ textAlign: "center", padding: "48px", color: "#aaa", fontSize: "13px" }}>Nothing remaining</td></tr>
+            <tr><td colSpan={7} style={{ textAlign: "center", padding: "48px", color: "#aaa", fontSize: "13px" }}>Nothing remaining</td></tr>
           )}
         </tbody>
       </table>
