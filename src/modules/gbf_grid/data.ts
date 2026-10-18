@@ -120,6 +120,8 @@ export const GROUPS: string[] = [
   "Beast",
   "Astral",
   "Premium",
+  "Evokers",
+  "Eternals",
 ];
 
 export const defaultWeaponForm = (source: string): Omit<Weapon, "id"> => ({
