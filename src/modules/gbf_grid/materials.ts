@@ -1,9 +1,9 @@
 import { bfValue, type AwakenType, type BefoulmentType, type CopyProgress, type Mats, type Stage, type Weapon } from "./data";
 
-export type MatCategory = "Stone" | "Quartz" | "Anima" | "Pendant" | "Luster" | "Star Fragment" | "Weapon Shard" | "New World Quartz" | "Gold Brick" | "Eternity Sand";
-export const MAT_CATEGORIES: MatCategory[] = ["Stone", "Quartz", "Anima", "Pendant", "Luster", "Star Fragment", "Weapon Shard", "New World Quartz", "Gold Brick", "Eternity Sand"];
+export type MatCategory = "CP" | "Stone" | "Quartz" | "Anima" | "Pendant" | "Luster" | "Star Fragment" | "Weapon Shard" | "New World Quartz" | "Gold Brick" | "Eternity Sand";
+export const MAT_CATEGORIES: MatCategory[] = ["CP", "Stone", "Quartz", "Anima", "Pendant", "Luster", "Star Fragment", "Weapon Shard", "New World Quartz", "Gold Brick", "Eternity Sand"];
 /** Single-item categories: the category name is the material name. */
-const SINGLE: MatCategory[] = ["New World Quartz", "Gold Brick", "Eternity Sand"];
+const SINGLE: MatCategory[] = ["CP", "New World Quartz", "Gold Brick", "Eternity Sand"];
 
 export function matCategory(name: string): MatCategory | null {
   if (SINGLE.includes(name as MatCategory)) return name as MatCategory;
