@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ELEMENT_META, type Element, type Weapon } from "../data";
-import { MAT_CATEGORIES, type MatCategory, fmt, matCategory, remainingExtra, remainingMats, sortedMats } from "../materials";
+import { MAT_CATEGORIES, SHARD_TRIALS, type MatCategory, fmt, matCategory, remainingExtra, remainingMats, sortedMats } from "../materials";
 
 interface Props {
   weapons: Weapon[];
@@ -75,7 +75,11 @@ export function MaterialsView({ weapons, groups, elementFilter }: Props) {
             const isOpen = open === name;
             return [
               <tr key={name} onClick={() => setOpen(isOpen ? null : name)} style={{ cursor: "pointer", borderBottom: "1px solid #f0f0f0" }}>
-                <td style={{ padding: "10px 16px", fontSize: "13px", fontWeight: 500 }}>{isOpen ? "▾" : "▸"} {name}</td>
+                <td style={{ padding: "10px 16px", fontSize: "13px", fontWeight: 500 }}>{isOpen ? "▾" : "▸"} {name}
+                  {SHARD_TRIALS[name] && (SHARD_TRIALS[name].length
+                    ? <span style={{ marginLeft: "8px", fontSize: "11px", color: "#888" }}>{SHARD_TRIALS[name].join(" / ")} Mastery Trial</span>
+                    : <span style={{ marginLeft: "8px", fontSize: "11px", fontWeight: 600, padding: "1px 6px", borderRadius: "4px", background: "#fdecea", color: "#b03a2e" }}>not from Mastery Trials</span>)}
+                </td>
                 <td style={{ padding: "10px 16px", fontSize: "12px", color: "#888" }}>{matCategory(name) ?? `${list[0].w.source} (group)`}</td>
                 <td style={{ padding: "10px 16px", fontSize: "13px", fontWeight: 700, textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{fmt(total)}</td>
                 <td style={{ padding: "10px 16px", fontSize: "12px", color: "#888", textAlign: "right" }}>{list.length}</td>

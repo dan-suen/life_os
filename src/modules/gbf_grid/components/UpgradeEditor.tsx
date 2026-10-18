@@ -1,5 +1,5 @@
 import { AWAKEN_TYPES, type AwakenType, type CopyProgress, type Mats, type Stage } from "../data";
-import { ANIMA, LUSTERS, PENDANTS, STAR_FRAGMENTS, QUARTZ, STAGE_KEYS, STONES, isSkillStage, matCategory, sortStages } from "../materials";
+import { ANIMA, LUSTERS, PENDANTS, STAR_FRAGMENTS, WEAPON_SHARDS, QUARTZ, STAGE_KEYS, STONES, isSkillStage, matCategory, sortStages } from "../materials";
 
 const labelStyle = { fontSize: "10px", fontWeight: 600 as const, color: "#666", textTransform: "uppercase" as const, letterSpacing: "0.05em" };
 const sel: React.CSSProperties = { border: "1px solid #d0d0d0", background: "#fff", color: "#1a1a1a", padding: "4px 6px", borderRadius: "5px", fontSize: "12px", cursor: "pointer" };
@@ -8,7 +8,7 @@ const link: React.CSSProperties = { fontSize: "11px", color: "#2253c7", cursor: 
 const box: React.CSSProperties = { background: "#fff", border: "1px solid #eee", borderRadius: "6px", padding: "10px 12px", display: "flex", flexDirection: "column", gap: "8px" };
 
 const VARIANTS = {
-  Stone: STONES, Quartz: QUARTZ, Anima: ANIMA, Pendant: PENDANTS, Luster: LUSTERS, "Star Fragment": STAR_FRAGMENTS,
+  Stone: STONES, Quartz: QUARTZ, Anima: ANIMA, Pendant: PENDANTS, Luster: LUSTERS, "Star Fragment": STAR_FRAGMENTS, "Weapon Shard": WEAPON_SHARDS,
   "New World Quartz": ["New World Quartz"], "Gold Brick": ["Gold Brick"], "Eternity Sand": ["Eternity Sand"],
 } as const;
 type Kind = keyof typeof VARIANTS;

@@ -1,7 +1,7 @@
 import { bfValue, type AwakenType, type BefoulmentType, type CopyProgress, type Mats, type Stage, type Weapon } from "./data";
 
-export type MatCategory = "Stone" | "Quartz" | "Anima" | "Pendant" | "Luster" | "Star Fragment" | "New World Quartz" | "Gold Brick" | "Eternity Sand";
-export const MAT_CATEGORIES: MatCategory[] = ["Stone", "Quartz", "Anima", "Pendant", "Luster", "Star Fragment", "New World Quartz", "Gold Brick", "Eternity Sand"];
+export type MatCategory = "Stone" | "Quartz" | "Anima" | "Pendant" | "Luster" | "Star Fragment" | "Weapon Shard" | "New World Quartz" | "Gold Brick" | "Eternity Sand";
+export const MAT_CATEGORIES: MatCategory[] = ["Stone", "Quartz", "Anima", "Pendant", "Luster", "Star Fragment", "Weapon Shard", "New World Quartz", "Gold Brick", "Eternity Sand"];
 /** Single-item categories: the category name is the material name. */
 const SINGLE: MatCategory[] = ["New World Quartz", "Gold Brick", "Eternity Sand"];
 
@@ -10,6 +10,7 @@ export function matCategory(name: string): MatCategory | null {
   if (/Anima$/.test(name)) return "Anima";
   if (/Luster$/.test(name)) return "Luster";
   if (STAR_FRAGMENTS.includes(name)) return "Star Fragment";
+  if (WEAPON_SHARDS.includes(name)) return "Weapon Shard";
   if (/Pendants?$/.test(name)) return "Pendant";
   if (QUARTZ.includes(name)) return "Quartz";  // element quartz only, not e.g. New World Quartz
   if (/Stone$/.test(name)) return "Stone";
@@ -72,6 +73,14 @@ export const sortStages = (stages: Stage[]) =>
 export const STONES = ["Sword", "Dagger", "Spear", "Axe", "Staff", "Pistol", "Melee", "Bow", "Harp", "Katana"].map(t => `${t} Stone`);
 export const QUARTZ = ["Fire", "Water", "Earth", "Wind", "Light", "Dark"].map(e => `${e} Quartz`);
 /** Anima options; extended as each group's data is entered (current gbf.wiki names). */
+export const WEAPON_SHARDS = ["Sword", "Dagger", "Spear", "Axe", "Staff", "Gun", "Gauntlet", "Bow", "Harp", "Katana"].map(t => `Silver ${t} Shard`);
+/** Which Mastery Trial raid drops each shard (gbf.wiki Silver * Shard pages); [] = no Mastery Trial drops it. */
+export const SHARD_TRIALS: Record<string, string[]> = {
+  "Silver Axe Shard": ["Martial"], "Silver Sword Shard": ["Martial"], "Silver Dagger Shard": ["Martial", "Esoteric"],
+  "Silver Staff Shard": ["Esoteric"], "Silver Katana Shard": ["Esoteric"],
+  "Silver Gauntlet Shard": ["Virtuosic"], "Silver Gun Shard": ["Virtuosic"], "Silver Harp Shard": ["Virtuosic"],
+  "Silver Spear Shard": [], "Silver Bow Shard": [],
+};
 export const STAR_FRAGMENTS = ["One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"].map(n => `${n}-Star Fragment`);
 export const LUSTERS = ["Ignis", "Aqua", "Terra", "Ventus"].map(e => `${e} Luster`);
 /** Pendant costs, e.g. awakening hammers bought at 50 pendants each. */
