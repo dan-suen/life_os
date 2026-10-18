@@ -1,7 +1,7 @@
 export type Element = "Fire" | "Wind" | "Water" | "Earth" | "Light" | "Dark" | "Any";
 
-export type AwakenType = "Atk" | "Def" | "Sp" | "";
-export const AWAKEN_TYPES: AwakenType[] = ["", "Atk", "Def", "Sp"];
+export type AwakenType = "Atk" | "Def" | "Sp" | "C.A." | "Skill DMG" | "";
+export const AWAKEN_TYPES: AwakenType[] = ["", "Atk", "Def", "Sp", "C.A.", "Skill DMG"];
 
 /** Material name -> amount, e.g. { "Katana Stone": 200, "Light Quartz": 200 }. */
 export type Mats = Record<string, number>;
