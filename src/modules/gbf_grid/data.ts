@@ -125,6 +125,9 @@ export const GROUPS: string[] = [
   "Origin Classes",
 ];
 
+/** Character/class groups: element, rank and copies are kept in the data but not shown. */
+export const CHARACTER_GROUPS: string[] = ["Evokers", "Eternals", "Origin Classes"];
+
 export const defaultWeaponForm = (source: string): Omit<Weapon, "id"> => ({
   element: "Fire", name: "", rank: "", copies: "", source, stages: [], progress: [],
 });

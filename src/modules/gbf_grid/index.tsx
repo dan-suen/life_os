@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BF_CAP, ELEMENT_META, GROUPS, type BefoulmentType, type CopyProgress, type Element, type Mats, type Weapon } from "./data";
+import { BF_CAP, CHARACTER_GROUPS, ELEMENT_META, GROUPS, type BefoulmentType, type CopyProgress, type Element, type Mats, type Weapon } from "./data";
 import { useGbfGrid } from "./hooks/useGbfGrid";
 import { useWeapons } from "./hooks/useWeapons";
 import { AddPanel } from "./components/AddPanel";
@@ -36,12 +36,15 @@ export default function GbfGridModule() {
   const groupTabs = [...GROUPS.filter(g => WEAPONS.some(w => w.source === g)), ...extraGroups];
 
   const groupWeapons = WEAPONS.filter(w => w.source === activeGroup);
-  const matchesFilter = (w: Weapon) => elementFilter === "All" || w.element === elementFilter || w.element === "Any";
+  const matchesFilter = (w: Weapon) =>
+    CHARACTER_GROUPS.includes(activeGroup) || elementFilter === "All" || w.element === elementFilter || w.element === "Any";
   const weapons = groupWeapons.filter(matchesFilter);
 
   const groupDone = groupWeapons.filter(w => isChecked(w.element, w.name)).length;
   const viewDone = weapons.filter(w => isChecked(w.element, w.name)).length;
   const isMaterials = activeGroup === MATERIALS_TAB;
+  // Character/class tabs: element, rank and copy columns carry no information there.
+  const isCharacters = CHARACTER_GROUPS.includes(activeGroup);
   const viewRemaining: Mats = {};
   const viewExtra: Mats = {};
   for (const w of weapons) { addMats(viewRemaining, remainingMats(w)); addMats(viewExtra, remainingExtra(w)); }
@@ -96,13 +99,13 @@ export default function GbfGridModule() {
             {!isMaterials && <span style={{ fontSize: "13px", color: "#888" }}>{groupDone}/{groupWeapons.length} obtained</span>}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <select
+            {!isCharacters && <select
               value={elementFilter}
               onChange={e => setElementFilter(e.target.value as ElementFilter)}
               style={{ border: "1px solid #d5d5d5", borderRadius: "6px", padding: "5px 8px", fontSize: "12px", background: "#fff", cursor: "pointer" }}
             >
               {FILTERS.map(f => <option key={f} value={f}>{f === "All" ? "All elements" : f}</option>)}
-            </select>
+            </select>}
             {!isMaterials && <button
               style={{ background: "#1a1a1a", color: "#fff", border: "none", padding: "6px 14px", borderRadius: "6px", fontSize: "12px", fontWeight: 600, cursor: "pointer" }}
               onClick={() => { setShowAdd(!showAdd); setEditing(null); }}
@@ -136,7 +139,7 @@ export default function GbfGridModule() {
             <div style={{ display: "flex", gap: "16px", alignItems: "flex-start", background: "#fff", border: "1px solid #eee", borderRadius: "8px", padding: "12px 16px", marginBottom: "12px" }}>
               <div style={{ display: "flex", flexDirection: "column", gap: "8px", minWidth: 0 }}>
                 <span onClick={() => setRemainingOpen(o => !o)} style={{ fontSize: "11px", fontWeight: 600, color: "#888", textTransform: "uppercase", letterSpacing: "0.05em", whiteSpace: "nowrap", cursor: "pointer", userSelect: "none" }}>
-                  {remainingOpen ? "▾" : "▸"} Remaining{elementFilter !== "All" ? ` (${elementFilter})` : ""}
+                  {remainingOpen ? "▾" : "▸"} Remaining{elementFilter !== "All" && !isCharacters ? ` (${elementFilter})` : ""}
                   <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0, marginLeft: "8px", color: "#aaa" }}>
                     {weapons.some(w => w.stages?.length)
                       ? `${Object.values(viewRemaining).filter(n => n > 0).length} materials${Object.values(viewExtra).some(n => n > 0) ? ` + ${Object.values(viewExtra).filter(n => n > 0).length} group-specific` : ""}`
@@ -165,10 +168,12 @@ export default function GbfGridModule() {
               <thead>
                 <tr style={{ background: "#1a1a1a", color: "#fff" }}>
                   <th style={thStyle("40px")}>✓</th>
-                  <th style={thStyle()}>Weapon</th>
-                  <th style={thStyle("90px")}>Element</th>
-                  <th style={thStyle("70px")}>Rank</th>
-                  <th style={thStyle("150px")}>Copy</th>
+                  <th style={thStyle()}>{isCharacters ? "Name" : "Weapon"}</th>
+                  {!isCharacters && <>
+                    <th style={thStyle("90px")}>Element</th>
+                    <th style={thStyle("70px")}>Rank</th>
+                    <th style={thStyle("150px")}>Copy</th>
+                  </>}
                   <th style={thStyle()}>Stages</th>
                   <th style={thStyle("200px")}>Remaining</th>
                   <th style={thStyle("70px")}></th>
@@ -188,19 +193,19 @@ export default function GbfGridModule() {
                   const setCopy = (j: number, c: CopyProgress) => setProgress(w.id, copies.map((x, k) => k === j ? c : x));
                   const copyCells = (j: number) => copies[j] ? (
                     <>
-                      <td style={{ ...tdStyle(), ...last(j), whiteSpace: "nowrap" }}>
+                      {!isCharacters && <td style={{ ...tdStyle(), ...last(j), whiteSpace: "nowrap" }}>
                         <span style={{ fontSize: "11px", color: "#999", marginRight: "6px" }}>#{j + 1}</span>
                         {hasForge && (
                           <span style={forgeBadge(!copies[j].skip?.includes("Forge"))}>{copies[j].skip?.includes("Forge") ? "Unforged" : "Mk II"}</span>
                         )}
                         <AwakenSelect copy={copies[j]} onChange={c => setCopy(j, c)} />
                         {isOdious && <div style={{ marginTop: "3px" }}><BfEditor copy={copies[j]} avoid={w.befoulment?.avoid} used={bfUsed[w.element] ?? {}} onChange={c => setCopy(j, c)} /></div>}
-                      </td>
+                      </td>}
                       <td style={{ ...tdStyle(), ...last(j) }}><StageChips stages={w.stages} copy={copies[j]} onChange={c => setCopy(j, c)} /></td>
                       <td style={{ ...tdStyle(), ...last(j) }}><MatList mats={copyRemaining(w, copies[j])} extras={copyRemainingExtra(w, copies[j])} limit={4} /></td>
                     </>
                   ) : (
-                    <td colSpan={3} style={{ ...tdStyle(), color: "#bbb" }}>{w.copies && !note ? `${w.copies} · ` : ""}no stage data</td>
+                    <td colSpan={isCharacters ? 2 : 3} style={{ ...tdStyle(), color: "#bbb" }}>{w.copies && !note ? `${w.copies} · ` : ""}no stage data</td>
                   );
                   return Array.from({ length: span }, (_, j) => (
                     <tr key={`${w.id}:${j}`} style={{ background: bg }}>
@@ -226,10 +231,12 @@ export default function GbfGridModule() {
                             )}
                             {isOdious && <BfRange avoid={w.befoulment?.avoid} used={bfUsed[w.element] ?? {}} />}
                           </td>
-                          <td rowSpan={span} style={{ ...tdStyle("center"), ...fade }}>
-                            <span style={elementStyle(w.element)}>{w.element}</span>
-                          </td>
-                          <td rowSpan={span} style={{ ...tdStyle("center"), ...fade }}>{w.rank || "—"}</td>
+                          {!isCharacters && <>
+                            <td rowSpan={span} style={{ ...tdStyle("center"), ...fade }}>
+                              <span style={elementStyle(w.element)}>{w.element}</span>
+                            </td>
+                            <td rowSpan={span} style={{ ...tdStyle("center"), ...fade }}>{w.rank || "—"}</td>
+                          </>}
                         </>
                       )}
                       {copyCells(j)}
@@ -249,12 +256,12 @@ export default function GbfGridModule() {
                   ));
                 })}
                 {weapons.length === 0 && (
-                  <tr><td colSpan={8} style={{ textAlign: "center", padding: "48px", color: "#aaa", fontSize: "13px" }}>No weapons</td></tr>
+                  <tr><td colSpan={isCharacters ? 5 : 8} style={{ textAlign: "center", padding: "48px", color: "#aaa", fontSize: "13px" }}>No weapons</td></tr>
                 )}
               </tbody>
             </table>
             <div style={{ marginTop: "12px", fontSize: "12px", color: "#aaa" }}>
-              {viewDone}/{weapons.length} checked{elementFilter !== "All" ? ` (${elementFilter})` : ""}
+              {viewDone}/{weapons.length} checked{elementFilter !== "All" && !isCharacters ? ` (${elementFilter})` : ""}
               {saving && <span style={{ marginLeft: "12px", color: "#2253c7" }}>Saving…</span>}
             </div>
           </>
