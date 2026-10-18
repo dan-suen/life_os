@@ -20,20 +20,29 @@ export const isAwakenStage = (key: string) => key.startsWith("Awaken");
 
 /**
  * Copies to track, planned from the copies text: "Atk 2, Def 1" -> [Atk, Atk, Def],
- * "Mk II: Atk 1, Sp 1 || Unforged: Def 1" -> [Atk, Sp, Def], "3" -> 3 untyped copies.
+ * "Mk II: Atk 1, Sp 1 || Unforged: Def 1" -> [Atk, Sp, Def (skips Forge)], "3" -> 3 untyped copies.
  */
-export function planCopies(copies: string): AwakenType[] {
-  const typed = [...copies.matchAll(/\b(Atk|Def|Sp)\s+(\d+)/g)];
-  if (typed.length) return typed.flatMap(m => Array<AwakenType>(Number(m[2])).fill(m[1] as AwakenType));
+export function planCopies(copies: string): CopyProgress[] {
+  const out: CopyProgress[] = [];
+  for (const part of copies.split("||")) {
+    const skip = /Unforged/i.test(part) ? ["Forge"] : undefined;
+    for (const m of part.matchAll(/\b(Atk|Def|Sp)\s+(\d+)/g))
+      for (let i = 0; i < Number(m[2]); i++) out.push({ done: [], awaken: m[1] as AwakenType, ...(skip && { skip }) });
+  }
+  if (out.length) return out;
   const n = /^\s*(\d+)\s*$/.exec(copies);
-  return Array<AwakenType>(n ? Number(n[1]) : 1).fill("");
+  return Array.from({ length: n ? Number(n[1]) : 1 }, () => ({ done: [], awaken: "" as AwakenType }));
 }
 
 /** Saved progress, or a fresh plan from the copies text if nothing is saved yet. */
 export function copiesOf(w: Pick<Weapon, "copies" | "progress">): CopyProgress[] {
   if (w.progress?.length) return w.progress;
-  return planCopies(w.copies).map(awaken => ({ done: [], awaken }));
+  return planCopies(w.copies);
 }
+
+/** Stages that apply to this copy (minus any it skips). */
+export const stagesFor = (w: Pick<Weapon, "stages">, c: CopyProgress) =>
+  (w.stages ?? []).filter(st => !c.skip?.includes(st.key));
 
 export function addMats(into: Mats, mats: Mats) {
   for (const [k, v] of Object.entries(mats)) into[k] = (into[k] ?? 0) + v;
@@ -54,8 +63,8 @@ export function sortedMats(mats: Mats): [string, number][] {
 
 export const fmt = (n: number) => n.toLocaleString("en-US");
 
-/** Stage order within a copy. 0★ = obtaining the copy itself; Craft = forging from a base weapon (e.g. Atma → Ultima, Rusted → Bahamut); Nova/Coda = Bahamut upgrades; T1–T5 = transcendence stages. "Skill" = skill fully levelled (a toggle, no materials tracked). */
-export const STAGE_KEYS = ["0★", "Craft", "Nova", "Coda", "1★", "2★", "3★", "4★", "5★", "6★", "T1", "T2", "T3", "T4", "T5", "Skill", "Awaken"] as const;
+/** Stage order within a copy. 0★ = obtaining the copy itself; Craft = forging from a base weapon (e.g. Atma → Ultima, Rusted → Bahamut); Nova/Coda = Bahamut upgrades; Forge = Mk II forge (per-copy, skippable); T1–T5 = transcendence stages. "Skill" = skill fully levelled (a toggle, no materials tracked). */
+export const STAGE_KEYS = ["0★", "Craft", "Nova", "Coda", "1★", "2★", "3★", "4★", "5★", "6★", "T1", "T2", "T3", "T4", "T5", "Forge", "Skill", "Awaken"] as const;
 export const isSkillStage = (key: string) => key === "Skill";
 export const sortStages = (stages: Stage[]) =>
   [...stages].sort((a, b) => STAGE_KEYS.indexOf(a.key as never) - STAGE_KEYS.indexOf(b.key as never));
@@ -78,21 +87,21 @@ export const ANIMA = [
 ];
 
 /** Uncaps are sequential: ticking 5★ also ticks lower uncaps, unticking 4★ also unticks 5★/6★. Skill/Awaken are independent. */
-const UNCAPS = ["0★", "Craft", "Nova", "Coda", "1★", "2★", "3★", "4★", "5★", "6★", "T1", "T2", "T3", "T4", "T5"];
-export function toggleStage(done: string[], key: string): string[] {
+const UNCAPS = ["0★", "Craft", "Nova", "Coda", "1★", "2★", "3★", "4★", "5★", "6★", "T1", "T2", "T3", "T4", "T5", "Forge"];
+export function toggleStage(done: string[], key: string, skip: string[] = []): string[] {
   const tier = UNCAPS.indexOf(key);
   if (done.includes(key)) {
     const drop = tier < 0 ? [key] : UNCAPS.slice(tier);
     return done.filter(k => !drop.includes(k));
   }
-  const add = tier < 0 ? [key] : UNCAPS.slice(0, tier + 1);
+  const add = tier < 0 ? [key] : UNCAPS.slice(0, tier + 1).filter(k => !skip.includes(k));
   return [...done, ...add.filter(k => !done.includes(k))];
 }
 
 /** Group-specific materials still needed for one copy (from gbf_weapon_extra_mats). */
 export function copyRemainingExtra(w: Weapon, c: CopyProgress): Mats {
   const out: Mats = {};
-  for (const st of w.stages ?? []) if (!c.done.includes(st.key)) addMats(out, w.extras?.[st.key] ?? {});
+  for (const st of stagesFor(w, c)) if (!c.done.includes(st.key)) addMats(out, w.extras?.[st.key] ?? {});
   return out;
 }
 
@@ -105,7 +114,7 @@ export function remainingExtra(w: Weapon): Mats {
 /** Materials still needed for one copy. */
 export function copyRemaining(w: Weapon, c: CopyProgress): Mats {
   const out: Mats = {};
-  for (const st of w.stages ?? []) if (!c.done.includes(st.key)) addMats(out, st.mats);
+  for (const st of stagesFor(w, c)) if (!c.done.includes(st.key)) addMats(out, st.mats);
   return out;
 }
 

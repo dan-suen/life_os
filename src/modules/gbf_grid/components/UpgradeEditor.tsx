@@ -85,11 +85,18 @@ export function StagesEditor({ stages, onChange }: StagesProps) {
 
 interface CopiesProps {
   copies: CopyProgress[];
+  /** Stage keys a copy may opt out of (e.g. "Forge"); shown as a per-copy toggle. */
+  optional?: string[];
   onChange: (copies: CopyProgress[]) => void;
 }
 
 /** Number of copies and each copy's awakening type. */
-export function CopiesEditor({ copies, onChange }: CopiesProps) {
+export function CopiesEditor({ copies, optional = [], onChange }: CopiesProps) {
+  const setSkip = (i: number, key: string, skipped: boolean) => onChange(copies.map((x, j) => {
+    if (j !== i) return x;
+    const skip = skipped ? [...(x.skip ?? []), key] : (x.skip ?? []).filter(k => k !== key);
+    return { ...x, skip, done: x.done.filter(k => !skip.includes(k)) };
+  }));
   function resize(n: number) {
     onChange(n > copies.length
       ? [...copies, ...Array.from({ length: n - copies.length }, () => ({ done: [], awaken: "" as AwakenType }))]
@@ -109,6 +116,12 @@ export function CopiesEditor({ copies, onChange }: CopiesProps) {
               onChange={e => onChange(copies.map((x, j) => j === i ? { ...x, awaken: e.target.value as AwakenType } : x))}>
               {AWAKEN_TYPES.map(t => <option key={t} value={t}>{t || "No awakening type"}</option>)}
             </select>
+            {optional.map(key => (
+              <select key={key} style={sel} value={c.skip?.includes(key) ? "skip" : "need"} onChange={e => setSkip(i, key, e.target.value === "skip")}>
+                <option value="need">{key}</option>
+                <option value="skip">No {key}</option>
+              </select>
+            ))}
           </label>
         ))}
       </div>

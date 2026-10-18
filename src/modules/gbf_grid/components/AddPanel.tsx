@@ -50,7 +50,7 @@ export function AddPanel({ source, saving, onAdd, onCancel }: Props) {
         </div>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "12px" }}>
-        <CopiesEditor copies={copiesOf(form)} onChange={progress => setForm({ ...form, progress })} />
+        <CopiesEditor copies={copiesOf(form)} optional={form.stages.some(s => s.key === "Forge") ? ["Forge"] : []} onChange={progress => setForm({ ...form, progress })} />
         <StagesEditor stages={form.stages} onChange={stages => setForm({ ...form, stages })} />
       </div>
       <div style={{ display: "flex", gap: "8px" }}>

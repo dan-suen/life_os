@@ -12,10 +12,12 @@ export interface Stage {
   mats: Mats;
 }
 
-/** Progress of a single copy: which stage keys are done, and its awakening type. */
+/** Progress of a single copy: which stage keys are done, its awakening type, and stages it doesn't need. */
 export interface CopyProgress {
   done: string[];
   awaken: AwakenType;
+  /** Stage keys this copy skips, e.g. "Forge" on an unforged Revans copy. */
+  skip?: string[];
 }
 
 export interface Weapon {
