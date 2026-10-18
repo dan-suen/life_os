@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { ELEMENT_META, GROUPS, type Element, type Mats, type Weapon } from "./data";
+import { ELEMENT_META, GROUPS, type CopyProgress, type Element, type Mats, type Weapon } from "./data";
 import { useGbfGrid } from "./hooks/useGbfGrid";
 import { useWeapons } from "./hooks/useWeapons";
 import { AddPanel } from "./components/AddPanel";
 import { EditPanel } from "./components/EditPanel";
-import { ProgressCell } from "./components/ProgressCell";
+import { AwakenSelect, StageChips } from "./components/ProgressCell";
 import { MatList } from "./components/MatList";
 import { MaterialsView } from "./components/MaterialsView";
-import { addMats, remainingMats } from "./materials";
+import { addMats, copiesNote, copiesOf, copyRemaining, remainingMats } from "./materials";
 
 type ElementFilter = Element | "All";
 const MATERIALS_TAB = "Σ Materials";
@@ -140,8 +140,8 @@ export default function GbfGridModule() {
                   <th style={thStyle()}>Weapon</th>
                   <th style={thStyle("90px")}>Element</th>
                   <th style={thStyle("70px")}>Rank</th>
-                  <th style={thStyle("140px")}>Copies</th>
-                  <th style={thStyle()}>Progress</th>
+                  <th style={thStyle("110px")}>Copy</th>
+                  <th style={thStyle()}>Stages</th>
                   <th style={thStyle("200px")}>Remaining</th>
                   <th style={thStyle("70px")}></th>
                 </tr>
@@ -149,50 +149,66 @@ export default function GbfGridModule() {
               <tbody>
                 {weapons.map((w, i) => {
                   const done = isChecked(w.element, w.name);
-                  return (
-                    <tr
-                      key={w.id}
-                      onClick={() => toggle(w.element, w.name)}
-                      style={{
-                        background: done ? "#f8f8f8" : i % 2 === 0 ? "#fff" : "#fafafa",
-                        cursor: "pointer",
-                        opacity: done ? 0.45 : 1,
-                        transition: "opacity 0.1s",
-                      }}
-                    >
-                      <td style={tdStyle("center")}>
-                        <span style={{
-                          display: "inline-flex", alignItems: "center", justifyContent: "center",
-                          width: "18px", height: "18px", borderRadius: "4px",
-                          border: done ? "none" : "1.5px solid #ccc",
-                          background: done ? "#1a1a1a" : "transparent",
-                          color: "#fff", fontSize: "11px", fontWeight: 700,
-                        }}>
-                          {done ? "✓" : ""}
-                        </span>
+                  const copies = w.stages?.length ? copiesOf(w) : [];
+                  const span = Math.max(copies.length, 1);
+                  const note = copiesNote(w.copies);
+                  const bg = done ? "#f8f8f8" : i % 2 === 0 ? "#fff" : "#fafafa";
+                  const fade: React.CSSProperties = { opacity: done ? 0.45 : 1, transition: "opacity 0.1s" };
+                  const last = (j: number) => j === span - 1 ? {} : { borderBottom: "1px dashed #eee" };
+                  const setCopy = (j: number, c: CopyProgress) => setProgress(w.id, copies.map((x, k) => k === j ? c : x));
+                  const copyCells = (j: number) => copies[j] ? (
+                    <>
+                      <td style={{ ...tdStyle(), ...last(j), whiteSpace: "nowrap" }}>
+                        <span style={{ fontSize: "11px", color: "#999", marginRight: "6px" }}>#{j + 1}</span>
+                        <AwakenSelect copy={copies[j]} onChange={c => setCopy(j, c)} />
                       </td>
-                      <td style={{ ...tdStyle(), fontWeight: 500, textDecoration: done ? "line-through" : "none", color: done ? "#999" : "#1a1a1a" }}>
-                        {w.name}
-                      </td>
-                      <td style={tdStyle("center")}>
-                        <span style={elementStyle(w.element)}>{w.element}</span>
-                      </td>
-                      <td style={tdStyle("center")}>{w.rank || "—"}</td>
-                      <td style={tdStyle()}>{w.copies || "—"}</td>
-                      <td style={tdStyle()}><ProgressCell weapon={w} onChange={p => setProgress(w.id, p)} /></td>
-                      <td style={tdStyle()}>{w.stages?.length ? <MatList mats={remainingMats(w)} /> : <span style={{ color: "#bbb" }}>—</span>}</td>
-                      <td style={tdStyle("center")} onClick={e => e.stopPropagation()}>
-                        <button
-                          style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: "13px", padding: "2px 5px", color: "#888" }}
-                          onClick={() => { setEditing(w); setShowAdd(false); }}
-                        >✎</button>
-                        <button
-                          style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: "13px", padding: "2px 5px", color: "#c0392b" }}
-                          onClick={() => { if (confirm(`Remove "${w.name}"?`)) remove(w.id); }}
-                        >✕</button>
-                      </td>
-                    </tr>
+                      <td style={{ ...tdStyle(), ...last(j) }}><StageChips stages={w.stages} copy={copies[j]} onChange={c => setCopy(j, c)} /></td>
+                      <td style={{ ...tdStyle(), ...last(j) }}><MatList mats={copyRemaining(w, copies[j])} /></td>
+                    </>
+                  ) : (
+                    <td colSpan={3} style={{ ...tdStyle(), color: "#bbb" }}>{w.copies && !note ? `${w.copies} · ` : ""}no stage data</td>
                   );
+                  return Array.from({ length: span }, (_, j) => (
+                    <tr key={`${w.id}:${j}`} style={{ background: bg }}>
+                      {j === 0 && (
+                        <>
+                          <td rowSpan={span} style={{ ...tdStyle("center"), ...fade, cursor: "pointer" }} onClick={() => toggle(w.element, w.name)}>
+                            <span style={{
+                              display: "inline-flex", alignItems: "center", justifyContent: "center",
+                              width: "18px", height: "18px", borderRadius: "4px",
+                              border: done ? "none" : "1.5px solid #ccc",
+                              background: done ? "#1a1a1a" : "transparent",
+                              color: "#fff", fontSize: "11px", fontWeight: 700,
+                            }}>
+                              {done ? "✓" : ""}
+                            </span>
+                          </td>
+                          <td rowSpan={span} style={{ ...tdStyle(), ...fade, fontWeight: 500, cursor: "pointer", textDecoration: done ? "line-through" : "none", color: done ? "#999" : "#1a1a1a" }}
+                            onClick={() => toggle(w.element, w.name)}>
+                            {w.name}
+                            {note && <div style={{ fontSize: "11px", color: "#999", fontWeight: 400 }}>{note}</div>}
+                          </td>
+                          <td rowSpan={span} style={{ ...tdStyle("center"), ...fade }}>
+                            <span style={elementStyle(w.element)}>{w.element}</span>
+                          </td>
+                          <td rowSpan={span} style={{ ...tdStyle("center"), ...fade }}>{w.rank || "—"}</td>
+                        </>
+                      )}
+                      {copyCells(j)}
+                      {j === 0 && (
+                        <td rowSpan={span} style={tdStyle("center")}>
+                          <button
+                            style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: "13px", padding: "2px 5px", color: "#888" }}
+                            onClick={() => { setEditing(w); setShowAdd(false); }}
+                          >✎</button>
+                          <button
+                            style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: "13px", padding: "2px 5px", color: "#c0392b" }}
+                            onClick={() => { if (confirm(`Remove "${w.name}"?`)) remove(w.id); }}
+                          >✕</button>
+                        </td>
+                      )}
+                    </tr>
+                  ));
                 })}
                 {weapons.length === 0 && (
                   <tr><td colSpan={8} style={{ textAlign: "center", padding: "48px", color: "#aaa", fontSize: "13px" }}>No weapons</td></tr>

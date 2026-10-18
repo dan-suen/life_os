@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { Weapon, Element } from "../data";
-import { textToStages } from "../materials";
+import { copiesOf } from "../materials";
+import { CopiesEditor, StagesEditor } from "./UpgradeEditor";
 import { ELEMENTS, GROUPS, defaultWeaponForm } from "../data";
 
 interface Props {
@@ -18,7 +19,6 @@ const btnStyle = (color: string, bg: string, border: string) => ({ background: b
 
 export function AddPanel({ source, saving, onAdd, onCancel }: Props) {
   const [form, setForm] = useState(defaultWeaponForm(source));
-  const [stagesText, setStagesText] = useState("");
 
   return (
     <div style={{ background: "#f0fff4", border: "1px solid #a8e6c0", borderRadius: "8px", padding: "16px", marginBottom: "12px" }}>
@@ -44,18 +44,14 @@ export function AddPanel({ source, saving, onAdd, onCancel }: Props) {
         </div>
         <div style={fieldStyle}>
           <label style={labelStyle}>Rank</label>
-          <input style={inputStyle} placeholder="—" value={form.rank} onChange={e => setForm({ ...form, rank: e.target.value })} />
-        </div>
-        <div style={fieldStyle}>
-          <label style={labelStyle}>Copies</label>
-          <input style={inputStyle} placeholder="2" value={form.copies} onChange={e => setForm({ ...form, copies: e.target.value })} />
+          <select style={selStyle} value={form.rank} onChange={e => setForm({ ...form, rank: e.target.value })}>
+            {["", "300", ...(["", "300"].includes(form.rank) ? [] : [form.rank])].map(r => <option key={r} value={r}>{r || "—"}</option>)}
+          </select>
         </div>
       </div>
-      <div style={{ ...fieldStyle, marginBottom: "12px" }}>
-        <label style={labelStyle}>Stages per copy (one per line, "Awaken…" = awakening)</label>
-        <textarea style={{ ...inputStyle, resize: "vertical", fontFamily: "inherit" }} rows={4}
-          placeholder={"4★: 200 Katana Stone, 200 Light Quartz, 10 Horus Omega Anima\nSL15: 12000 Skill Points\nAwaken: 15 Horus Omega Anima"}
-          value={stagesText} onChange={e => { setStagesText(e.target.value); setForm({ ...form, stages: textToStages(e.target.value) }); }} />
+      <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "12px" }}>
+        <CopiesEditor copies={copiesOf(form)} onChange={progress => setForm({ ...form, progress })} />
+        <StagesEditor stages={form.stages} onChange={stages => setForm({ ...form, stages })} />
       </div>
       <div style={{ display: "flex", gap: "8px" }}>
         <button style={btnStyle("#fff", "#1a9e5c", "#1a9e5c")} disabled={saving || !form.name.trim()} onClick={() => onAdd(form)}>Add</button>

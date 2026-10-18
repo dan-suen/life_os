@@ -25,7 +25,7 @@ export function planCopies(copies: string): AwakenType[] {
 }
 
 /** Saved progress, or a fresh plan from the copies text if nothing is saved yet. */
-export function copiesOf(w: Weapon): CopyProgress[] {
+export function copiesOf(w: Pick<Weapon, "copies" | "progress">): CopyProgress[] {
   if (w.progress?.length) return w.progress;
   return planCopies(w.copies).map(awaken => ({ done: [], awaken }));
 }
@@ -37,9 +37,7 @@ export function addMats(into: Mats, mats: Mats) {
 /** Materials still needed: every stage not ticked on every copy. */
 export function remainingMats(w: Weapon): Mats {
   const out: Mats = {};
-  for (const c of copiesOf(w)) {
-    for (const st of w.stages ?? []) if (!c.done.includes(st.key)) addMats(out, st.mats);
-  }
+  for (const c of copiesOf(w)) addMats(out, copyRemaining(w, c));
   return out;
 }
 
@@ -51,20 +49,45 @@ export function sortedMats(mats: Mats): [string, number][] {
 
 export const fmt = (n: number) => n.toLocaleString("en-US");
 
-/** Stages as editable text, one per line: "4★: 200 Katana Stone, 10 Horus Omega Anima". */
-export function stagesToText(stages: Stage[]): string {
-  return (stages ?? []).map(s => `${s.key}: ${Object.entries(s.mats).map(([k, v]) => `${v} ${k}`).join(", ")}`).join("\n");
+/** Stage order within a copy. SL caps: 0–3★ = 10, 4★ = 15, 5★ = 20, 6★ = 25. */
+export const STAGE_KEYS = ["SL10", "4★", "SL15", "5★", "SL20", "6★", "SL25", "Awaken"] as const;
+export const isSkillStage = (key: string) => key.startsWith("SL");
+export const sortStages = (stages: Stage[]) =>
+  [...stages].sort((a, b) => STAGE_KEYS.indexOf(a.key as never) - STAGE_KEYS.indexOf(b.key as never));
+
+export const STONES = ["Sabre", "Dagger", "Spear", "Axe", "Staff", "Gun", "Melee", "Bow", "Harp", "Katana"].map(t => `${t} Stone`);
+export const QUARTZ = ["Fire", "Water", "Earth", "Wind", "Light", "Dark"].map(e => `${e} Quartz`);
+/** Anima options; extended as each group's data is entered (current gbf.wiki names). */
+export const ANIMA = ["Horus Anima", "Horus Omega Anima"];
+
+/**
+ * Skill points per level-up, from gbf.wiki "Upgrading Weapon Skills" (points for a 100% skill up).
+ * "special" = Bahamut / Seraphic / Ultima / Dark Opus / Draconic.
+ */
+export type SkillTable = "standard" | "special";
+function levelCost(table: SkillTable, lv: number): number {
+  if (table === "standard") return lv < 15 ? 200 * lv : 1000 * lv;
+  return lv < 15 ? 1000 * lv : Math.floor(25000 + (lv - 15) * 5000 / 3);
+}
+const SL_RANGE: Record<string, [number, number]> = { SL10: [1, 10], SL15: [10, 15], SL20: [15, 20], SL25: [20, 25] };
+export function skillPoints(table: SkillTable, key: string): number {
+  const [from, to] = SL_RANGE[key] ?? [0, 0];
+  let total = 0;
+  for (let lv = from; lv < to; lv++) total += levelCost(table, lv);
+  return total;
+}
+export function inferSkillTable(stages: Stage[]): SkillTable {
+  const st = stages.find(s => isSkillStage(s.key));
+  return st && st.mats["Skill Points"] === skillPoints("special", st.key) ? "special" : "standard";
 }
 
-export function textToStages(text: string): Stage[] {
-  return text.split("\n").map(l => l.trim()).filter(Boolean).map(line => {
-    const i = line.indexOf(":");
-    const key = (i < 0 ? line : line.slice(0, i)).trim();
-    const mats: Mats = {};
-    for (const part of (i < 0 ? "" : line.slice(i + 1)).split(",")) {
-      const m = /^\s*([\d,]+)\s+(.+?)\s*$/.exec(part);
-      if (m) mats[m[2]] = Number(m[1].replace(/,/g, ""));
-    }
-    return { key, mats };
-  });
+/** Materials still needed for one copy. */
+export function copyRemaining(w: Weapon, c: CopyProgress): Mats {
+  const out: Mats = {};
+  for (const st of w.stages ?? []) if (!c.done.includes(st.key)) addMats(out, st.mats);
+  return out;
 }
+
+/** Copies text that isn't a copy plan (e.g. Proven shop prices) is shown as a note. */
+export const copiesNote = (copies: string) =>
+  /\b(Atk|Def|Sp)\s+\d/.test(copies) || /^\s*\d*\s*$/.test(copies) ? "" : copies;
