@@ -1,7 +1,7 @@
 import type { AwakenType, CopyProgress, Mats, Stage, Weapon } from "./data";
 
-export type MatCategory = "Weapon Copy" | "Stone" | "Quartz" | "Anima" | "Pendant" | "Luster" | "New World Quartz" | "Gold Brick" | "Eternity Sand";
-export const MAT_CATEGORIES: MatCategory[] = ["Weapon Copy", "Stone", "Quartz", "Anima", "Pendant", "Luster", "New World Quartz", "Gold Brick", "Eternity Sand"];
+export type MatCategory = "Weapon Copy" | "Stone" | "Quartz" | "Anima" | "Pendant" | "Luster" | "Star Fragment" | "New World Quartz" | "Gold Brick" | "Eternity Sand";
+export const MAT_CATEGORIES: MatCategory[] = ["Weapon Copy", "Stone", "Quartz", "Anima", "Pendant", "Luster", "Star Fragment", "New World Quartz", "Gold Brick", "Eternity Sand"];
 /** Single-item categories: the category name is the material name. "Weapon Copy" = a duplicate fed in for a 1★–3★ uncap. */
 const SINGLE: MatCategory[] = ["Weapon Copy", "New World Quartz", "Gold Brick", "Eternity Sand"];
 
@@ -9,6 +9,7 @@ export function matCategory(name: string): MatCategory | null {
   if (SINGLE.includes(name as MatCategory)) return name as MatCategory;
   if (/Anima$/.test(name)) return "Anima";
   if (/Luster$/.test(name)) return "Luster";
+  if (STAR_FRAGMENTS.includes(name)) return "Star Fragment";
   if (/Pendants?$/.test(name)) return "Pendant";
   if (QUARTZ.includes(name)) return "Quartz";  // element quartz only, not e.g. New World Quartz
   if (/Stone$/.test(name)) return "Stone";
@@ -62,6 +63,7 @@ export const sortStages = (stages: Stage[]) =>
 export const STONES = ["Sword", "Dagger", "Spear", "Axe", "Staff", "Pistol", "Melee", "Bow", "Harp", "Katana"].map(t => `${t} Stone`);
 export const QUARTZ = ["Fire", "Water", "Earth", "Wind", "Light", "Dark"].map(e => `${e} Quartz`);
 /** Anima options; extended as each group's data is entered (current gbf.wiki names). */
+export const STAR_FRAGMENTS = ["One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"].map(n => `${n}-Star Fragment`);
 export const LUSTERS = ["Ignis", "Aqua", "Terra", "Ventus"].map(e => `${e} Luster`);
 /** Pendant costs, e.g. awakening hammers bought at 50 pendants each. */
 export const PENDANTS = ["Pendants"];
