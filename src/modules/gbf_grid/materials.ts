@@ -50,7 +50,7 @@ export function sortedMats(mats: Mats): [string, number][] {
 export const fmt = (n: number) => n.toLocaleString("en-US");
 
 /** Stage order within a copy. "Skill" = skill fully levelled (a toggle, no materials tracked). */
-export const STAGE_KEYS = ["4★", "5★", "6★", "Skill", "Awaken"] as const;
+export const STAGE_KEYS = ["1★", "2★", "3★", "4★", "5★", "6★", "Skill", "Awaken"] as const;
 export const isSkillStage = (key: string) => key === "Skill";
 export const sortStages = (stages: Stage[]) =>
   [...stages].sort((a, b) => STAGE_KEYS.indexOf(a.key as never) - STAGE_KEYS.indexOf(b.key as never));
@@ -65,10 +65,11 @@ export const ANIMA = [
   "Metatron Omega Anima", "Michael Anima", "Raphael Anima",
   "Credo Omega Anima", "Luminiera Omega Anima",
   "Qilin Omega Anima", "Huanglong Omega Anima",
+  "Uriel Anima", "Gabriel Anima",
 ];
 
-/** Uncaps are sequential: ticking 5★ also ticks 4★, unticking 4★ also unticks 5★/6★. Skill/Awaken are independent. */
-const UNCAPS = ["4★", "5★", "6★"];
+/** Uncaps are sequential: ticking 5★ also ticks lower uncaps, unticking 4★ also unticks 5★/6★. Skill/Awaken are independent. */
+const UNCAPS = ["1★", "2★", "3★", "4★", "5★", "6★"];
 export function toggleStage(done: string[], key: string): string[] {
   const tier = UNCAPS.indexOf(key);
   if (done.includes(key)) {
