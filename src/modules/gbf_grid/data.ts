@@ -18,19 +18,35 @@ export interface CopyProgress {
   awaken: AwakenType;
   /** Stage keys this copy skips, e.g. "Forge" on an unforged Revans copy. */
   skip?: string[];
-  /** Target befoulment for this copy (Odious), e.g. "DSR". */
-  bf?: BefoulmentType;
 }
 
 /** Befoulment types (gbf.wiki Befoulments). */
 export type BefoulmentType = "ATK" | "DSR" | "Skill" | "DEF" | "HP" | "C.A." | "M.A." | "Turn";
 export const BEFOULMENTS: BefoulmentType[] = ["DSR", "ATK", "Skill", "DEF", "HP", "C.A.", "M.A.", "Turn"];
-/** low = small values / easy to offset; medium = only at low permeation; high = never take. */
-export const BF_DANGER: Record<BefoulmentType, "low" | "medium" | "high"> = {
-  DSR: "low", ATK: "low", Skill: "medium", DEF: "medium", HP: "medium", "C.A.": "medium", "M.A.": "high", Turn: "high",
+/**
+ * Befoulment budget for any deployed grid (C.A.-preferring setup). Values are gbf.wiki Lvl-1 ranges
+ * (Prm 1 → Prm 6), linearly interpolated, minus the average Lvl-5 exorcision reduction.
+ * maxPrm: worst permeation worth keeping on a piece; maxInGrid: how many the grid can carry.
+ * Types not listed here (C.A., M.A., Turn) are never taken.
+ */
+export const BF_BUDGET: Partial<Record<BefoulmentType, { maxPrm: number; maxInGrid: number; note?: string }>> = {
+  DSR:   { maxPrm: 3, maxInGrid: 3 },
+  ATK:   { maxPrm: 2, maxInGrid: 2 },
+  Skill: { maxPrm: 3, maxInGrid: 2, note: "2 only if both Prm 1, otherwise 1" },
+  DEF:   { maxPrm: 2, maxInGrid: 1 },
+  HP:    { maxPrm: 1, maxInGrid: 1 },
 };
-/** Highest permeation worth keeping for each befoulment, when taken at all. */
-export const BF_MAX_PRM: Partial<Record<BefoulmentType, number>> = { DEF: 2, HP: 2 };
+const BF_RANGE: Record<BefoulmentType, [number, number]> = {
+  ATK: [6, 16], DSR: [6, 16], Turn: [6, 16], DEF: [13, 33], "M.A.": [10, 25], Skill: [22, 50], "C.A.": [22, 50], HP: [22, 50],
+};
+const BF_EXO_AVG: Record<BefoulmentType, number> = {
+  ATK: 0.6, DSR: 0.6, Turn: 0.6, DEF: 1.2, "M.A.": 1.0, Skill: 2.0, "C.A.": 2.0, HP: 2.0,
+};
+/** Estimated befoulment % at a permeation, after exorcising to `exo` (1–5). */
+export function bfValue(t: BefoulmentType, prm: number, exo = 5): number {
+  const [lo, hi] = BF_RANGE[t];
+  return Math.max(0, lo + (hi - lo) * (prm - 1) / 5 - BF_EXO_AVG[t] * (exo - 1));
+}
 
 /** Weapon-level befoulment notes: BF types that undercut this weapon's own skills. */
 export interface BefoulmentInfo {

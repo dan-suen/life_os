@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { BEFOULMENTS, ELEMENT_META, GROUPS, type CopyProgress, type Element, type Mats, type Weapon } from "./data";
+import { BF_BUDGET, ELEMENT_META, GROUPS, bfValue, type BefoulmentType, type CopyProgress, type Element, type Mats, type Weapon } from "./data";
 import { useGbfGrid } from "./hooks/useGbfGrid";
 import { useWeapons } from "./hooks/useWeapons";
 import { AddPanel } from "./components/AddPanel";
 import { EditPanel } from "./components/EditPanel";
-import { AwakenSelect, BefoulmentSelect, StageChips } from "./components/ProgressCell";
+import { AwakenSelect, BfRange, StageChips } from "./components/ProgressCell";
 import { MatList } from "./components/MatList";
 import { MaterialsView } from "./components/MaterialsView";
 import { addMats, copiesNote, copiesOf, copyRemaining, copyRemainingExtra, remainingExtra, remainingMats } from "./materials";
@@ -44,10 +44,7 @@ export default function GbfGridModule() {
   const viewRemaining: Mats = {};
   const viewExtra: Mats = {};
   for (const w of weapons) { addMats(viewRemaining, remainingMats(w)); addMats(viewExtra, remainingExtra(w)); }
-  // Planned befoulments across the visible copies (Odious).
-  const bfCount: Record<string, number> = {};
-  for (const w of weapons) for (const c of copiesOf(w)) if (c.bf) bfCount[c.bf] = (bfCount[c.bf] ?? 0) + 1;
-  const bfTally = BEFOULMENTS.filter(t => bfCount[t]).map(t => [t, bfCount[t]] as const);
+
 
   async function handleAdd(form: Omit<Weapon, "id">) {
     if (!form.name.trim()) return;
@@ -137,10 +134,13 @@ export default function GbfGridModule() {
                 Remaining{elementFilter !== "All" ? ` (${elementFilter})` : ""}
               </span>
               {weapons.some(w => w.stages?.length) ? <MatList mats={viewRemaining} extras={viewExtra} /> : <span style={{ fontSize: "12px", color: "#bbb" }}>No stage data yet</span>}
-              {bfTally.length > 0 && (
-                <span style={{ marginLeft: "auto", fontSize: "12px", color: "#555", textAlign: "right" }}>
-                  <span style={{ fontSize: "11px", fontWeight: 600, color: "#888", textTransform: "uppercase", letterSpacing: "0.05em", marginRight: "6px" }}>BF plan</span>
-                  {bfTally.map(([t, n]) => `${t} ${n}`).join(" · ")}
+              {activeGroup === "Odious" && (
+                <span style={{ marginLeft: "auto", fontSize: "12px", color: "#555", maxWidth: "460px" }}>
+                  <span style={{ fontSize: "11px", fontWeight: 600, color: "#888", textTransform: "uppercase", letterSpacing: "0.05em", marginRight: "6px" }}>Grid BF budget</span>
+                  {(Object.entries(BF_BUDGET) as [BefoulmentType, { maxPrm: number; maxInGrid: number; note?: string }][]).map(([t, b]) =>
+                    `${t} ×${b.maxInGrid} (Prm ≤${b.maxPrm}, ~${Math.round(bfValue(t, b.maxPrm))}% each)${b.note ? ` — ${b.note}` : ""}`).join(" · ")}
+                  {" · no C.A., M.A., Turn"}
+                  <div style={{ fontSize: "11px", color: "#999" }}>Spread across the whole grid; values assume exorcision Lvl 5.</div>
                 </span>
               )}
             </div>
@@ -177,7 +177,6 @@ export default function GbfGridModule() {
                           <span style={forgeBadge(!copies[j].skip?.includes("Forge"))}>{copies[j].skip?.includes("Forge") ? "Unforged" : "Mk II"}</span>
                         )}
                         <AwakenSelect copy={copies[j]} onChange={c => setCopy(j, c)} />
-                        {isOdious && <span style={{ marginLeft: "4px" }}><BefoulmentSelect copy={copies[j]} avoid={w.befoulment?.avoid} onChange={c => setCopy(j, c)} /></span>}
                       </td>
                       <td style={{ ...tdStyle(), ...last(j) }}><StageChips stages={w.stages} copy={copies[j]} onChange={c => setCopy(j, c)} /></td>
                       <td style={{ ...tdStyle(), ...last(j) }}><MatList mats={copyRemaining(w, copies[j])} extras={copyRemainingExtra(w, copies[j])} /></td>
@@ -207,9 +206,7 @@ export default function GbfGridModule() {
                             {!note && w.copies && copies.length > 0 && (
                               <div style={{ fontSize: "11px", color: "#888", fontWeight: 400, marginTop: "2px" }}>Goal: {w.copies}</div>
                             )}
-                            {isOdious && !!w.befoulment?.avoid?.length && (
-                              <div style={{ fontSize: "11px", color: "#b03a2e", fontWeight: 400, marginTop: "2px" }}>Avoid BF: {w.befoulment.avoid.join(", ")}</div>
-                            )}
+                            {isOdious && <BfRange avoid={w.befoulment?.avoid} />}
                           </td>
                           <td rowSpan={span} style={{ ...tdStyle("center"), ...fade }}>
                             <span style={elementStyle(w.element)}>{w.element}</span>
