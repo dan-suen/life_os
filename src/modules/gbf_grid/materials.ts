@@ -63,8 +63,8 @@ export function sortedMats(mats: Mats): [string, number][] {
 
 export const fmt = (n: number) => n.toLocaleString("en-US");
 
-/** Stage order within a copy. 0★ = obtaining the copy itself; Craft = forging from a base weapon (e.g. Atma → Ultima, Rusted → Bahamut); Nova/Coda = Bahamut upgrades; Forge = Mk II forge (per-copy, skippable); T1–T5 = transcendence stages. "Skill" = skill fully levelled (a toggle, no materials tracked). */
-export const STAGE_KEYS = ["0★", "Craft", "Nova", "Coda", "1★", "2★", "3★", "4★", "5★", "6★", "T1", "T2", "T3", "T4", "T5", "Forge", "Skill", "Awaken"] as const;
+/** Stage order within a copy. 0★ = obtaining the copy itself; Craft = forging from a base weapon (e.g. Atma → Ultima, Rusted → Bahamut); Nova/Coda = Bahamut upgrades; Forge = Mk II forge (per-copy, skippable); D1–D4 = Evoker Domain bonuses (any order, needed for 5★); 4th Skill = Evoker World card; T1–T5 = transcendence stages. "Skill" = skill fully levelled (a toggle, no materials tracked). */
+export const STAGE_KEYS = ["0★", "Craft", "Nova", "Coda", "1★", "2★", "3★", "4★", "D1", "D2", "D3", "D4", "5★", "6★", "T1", "T2", "T3", "T4", "T5", "Forge", "4th Skill", "Skill", "Awaken"] as const;
 export const isSkillStage = (key: string) => key === "Skill";
 export const sortStages = (stages: Stage[]) =>
   [...stages].sort((a, b) => STAGE_KEYS.indexOf(a.key as never) - STAGE_KEYS.indexOf(b.key as never));
