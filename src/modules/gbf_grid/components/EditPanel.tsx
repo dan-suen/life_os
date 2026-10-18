@@ -1,4 +1,6 @@
+import { useState } from "react";
 import type { Weapon, Element } from "../data";
+import { stagesToText, textToStages } from "../materials";
 import { ELEMENTS, GROUPS } from "../data";
 
 interface Props {
@@ -16,6 +18,7 @@ const selStyle = { border: "1px solid #d0d0d0", background: "#fff", color: "#1a1
 const btnStyle = (color: string, bg: string, border: string) => ({ background: bg, color, border: `1px solid ${border}`, padding: "6px 14px", borderRadius: "6px", fontSize: "12px", fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" as const });
 
 export function EditPanel({ form, saving, onChange, onSave, onCancel }: Props) {
+  const [stagesText, setStagesText] = useState(() => stagesToText(form.stages));
   return (
     <div style={{ background: "#fffbea", border: "1px solid #f0c040", borderRadius: "8px", padding: "16px", marginBottom: "12px" }}>
       <div style={{ fontSize: "12px", fontWeight: 600, color: "#b07d00", marginBottom: "12px" }}>Editing weapon</div>
@@ -47,6 +50,12 @@ export function EditPanel({ form, saving, onChange, onSave, onCancel }: Props) {
           <label style={labelStyle}>Copies</label>
           <input style={inputStyle} value={form.copies} onChange={e => onChange({ ...form, copies: e.target.value })} />
         </div>
+      </div>
+      <div style={{ ...fieldStyle, marginBottom: "12px" }}>
+        <label style={labelStyle}>Stages per copy (one per line, "Awaken…" = awakening)</label>
+        <textarea style={{ ...inputStyle, resize: "vertical", fontFamily: "inherit" }} rows={4}
+          placeholder={"4★: 200 Katana Stone, 200 Light Quartz, 10 Horus Omega Anima\nSL15: 12000 Skill Points\nAwaken: 15 Horus Omega Anima"}
+          value={stagesText} onChange={e => { setStagesText(e.target.value); onChange({ ...form, stages: textToStages(e.target.value) }); }} />
       </div>
       <div style={{ display: "flex", gap: "8px" }}>
         <button style={btnStyle("#fff", "#1a9e5c", "#1a9e5c")} disabled={saving || !form.name.trim()} onClick={onSave}>Save</button>

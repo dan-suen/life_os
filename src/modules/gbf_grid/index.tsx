@@ -1,11 +1,16 @@
 import { useState } from "react";
-import { ELEMENT_META, GROUPS, type Element, type Weapon } from "./data";
+import { ELEMENT_META, GROUPS, type Element, type Mats, type Weapon } from "./data";
 import { useGbfGrid } from "./hooks/useGbfGrid";
 import { useWeapons } from "./hooks/useWeapons";
 import { AddPanel } from "./components/AddPanel";
 import { EditPanel } from "./components/EditPanel";
+import { ProgressCell } from "./components/ProgressCell";
+import { MatList } from "./components/MatList";
+import { MaterialsView } from "./components/MaterialsView";
+import { addMats, remainingMats } from "./materials";
 
 type ElementFilter = Element | "All";
+const MATERIALS_TAB = "Σ Materials";
 const FILTERS: ElementFilter[] = ["All", "Fire", "Wind", "Water", "Earth", "Light", "Dark", "Any"];
 
 function elementStyle(el: Element): React.CSSProperties {
@@ -17,7 +22,7 @@ export default function GbfGridModule() {
   const [activeGroup, setActiveGroup] = useState<string>(GROUPS[0]);
   const [elementFilter, setElementFilter] = useState<ElementFilter>("All");
   const { isChecked, loading: checkedLoading, error: checkedError, setError: setCheckedError, toggle } = useGbfGrid();
-  const { weapons: WEAPONS, loading: weaponsLoading, saving, error: weaponsError, setError: setWeaponsError, add, update, remove } = useWeapons();
+  const { weapons: WEAPONS, loading: weaponsLoading, saving, error: weaponsError, setError: setWeaponsError, add, update, setProgress, remove } = useWeapons();
   const [showAdd, setShowAdd] = useState(false);
   const [editing, setEditing] = useState<Weapon | null>(null);
 
@@ -35,6 +40,9 @@ export default function GbfGridModule() {
 
   const groupDone = groupWeapons.filter(w => isChecked(w.element, w.name)).length;
   const viewDone = weapons.filter(w => isChecked(w.element, w.name)).length;
+  const isMaterials = activeGroup === MATERIALS_TAB;
+  const viewRemaining: Mats = {};
+  for (const w of weapons) addMats(viewRemaining, remainingMats(w));
 
   async function handleAdd(form: Omit<Weapon, "id">) {
     if (!form.name.trim()) return;
@@ -67,6 +75,11 @@ export default function GbfGridModule() {
             </button>
           );
         })}
+        <button onClick={() => { setActiveGroup(MATERIALS_TAB); setShowAdd(false); setEditing(null); }} style={{
+          padding: "8px 14px", border: "none", cursor: "pointer", fontSize: "12px", marginLeft: "auto",
+          background: isMaterials ? "#f9f9f9" : "transparent", color: isMaterials ? "#1a1a1a" : "#c9a227",
+          fontWeight: 700, borderRadius: "6px 6px 0 0", whiteSpace: "nowrap",
+        }}>{MATERIALS_TAB}</button>
       </div>
 
       {/* Header + element filter */}
@@ -74,7 +87,7 @@ export default function GbfGridModule() {
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", flexWrap: "wrap" }}>
           <div style={{ display: "flex", alignItems: "baseline", gap: "12px" }}>
             <span style={{ fontSize: "17px", fontWeight: 700, letterSpacing: "-0.02em" }}>{activeGroup}</span>
-            <span style={{ fontSize: "13px", color: "#888" }}>{groupDone}/{groupWeapons.length} obtained</span>
+            {!isMaterials && <span style={{ fontSize: "13px", color: "#888" }}>{groupDone}/{groupWeapons.length} obtained</span>}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             <select
@@ -84,12 +97,12 @@ export default function GbfGridModule() {
             >
               {FILTERS.map(f => <option key={f} value={f}>{f === "All" ? "All elements" : f}</option>)}
             </select>
-            <button
+            {!isMaterials && <button
               style={{ background: "#1a1a1a", color: "#fff", border: "none", padding: "6px 14px", borderRadius: "6px", fontSize: "12px", fontWeight: 600, cursor: "pointer" }}
               onClick={() => { setShowAdd(!showAdd); setEditing(null); }}
             >
               + Add
-            </button>
+            </button>}
           </div>
         </div>
       </div>
@@ -104,6 +117,8 @@ export default function GbfGridModule() {
       <div style={{ flex: 1, padding: "24px" }}>
         {loading ? (
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "40vh", color: "#aaa" }}>Loading…</div>
+        ) : isMaterials ? (
+          <MaterialsView weapons={WEAPONS} groups={groupTabs} elementFilter={elementFilter} />
         ) : (
           <>
             {showAdd && (
@@ -112,6 +127,12 @@ export default function GbfGridModule() {
             {editing && (
               <EditPanel form={editing} saving={saving} onChange={setEditing} onSave={handleSaveEdit} onCancel={() => setEditing(null)} />
             )}
+            <div style={{ display: "flex", gap: "16px", alignItems: "flex-start", background: "#fff", border: "1px solid #eee", borderRadius: "8px", padding: "12px 16px", marginBottom: "12px" }}>
+              <span style={{ fontSize: "11px", fontWeight: 600, color: "#888", textTransform: "uppercase", letterSpacing: "0.05em", whiteSpace: "nowrap" }}>
+                Remaining{elementFilter !== "All" ? ` (${elementFilter})` : ""}
+              </span>
+              {weapons.some(w => w.stages?.length) ? <MatList mats={viewRemaining} /> : <span style={{ fontSize: "12px", color: "#bbb" }}>No stage data yet</span>}
+            </div>
             <table style={{ width: "100%", borderCollapse: "collapse", background: "#fff", borderRadius: "8px", overflow: "hidden", boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
               <thead>
                 <tr style={{ background: "#1a1a1a", color: "#fff" }}>
@@ -119,7 +140,9 @@ export default function GbfGridModule() {
                   <th style={thStyle()}>Weapon</th>
                   <th style={thStyle("90px")}>Element</th>
                   <th style={thStyle("70px")}>Rank</th>
-                  <th style={thStyle("220px")}>Copies</th>
+                  <th style={thStyle("140px")}>Copies</th>
+                  <th style={thStyle()}>Progress</th>
+                  <th style={thStyle("200px")}>Remaining</th>
                   <th style={thStyle("70px")}></th>
                 </tr>
               </thead>
@@ -156,6 +179,8 @@ export default function GbfGridModule() {
                       </td>
                       <td style={tdStyle("center")}>{w.rank || "—"}</td>
                       <td style={tdStyle()}>{w.copies || "—"}</td>
+                      <td style={tdStyle()}><ProgressCell weapon={w} onChange={p => setProgress(w.id, p)} /></td>
+                      <td style={tdStyle()}>{w.stages?.length ? <MatList mats={remainingMats(w)} /> : <span style={{ color: "#bbb" }}>—</span>}</td>
                       <td style={tdStyle("center")} onClick={e => e.stopPropagation()}>
                         <button
                           style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: "13px", padding: "2px 5px", color: "#888" }}
@@ -170,7 +195,7 @@ export default function GbfGridModule() {
                   );
                 })}
                 {weapons.length === 0 && (
-                  <tr><td colSpan={6} style={{ textAlign: "center", padding: "48px", color: "#aaa", fontSize: "13px" }}>No weapons</td></tr>
+                  <tr><td colSpan={8} style={{ textAlign: "center", padding: "48px", color: "#aaa", fontSize: "13px" }}>No weapons</td></tr>
                 )}
               </tbody>
             </table>

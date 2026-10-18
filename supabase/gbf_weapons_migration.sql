@@ -20,6 +20,11 @@ create table if not exists gbf_weapons (
   name text not null,
   rank text not null default '',
   copies text not null default '',
+  -- Per-copy upgrade stages: [{"key": "4★", "mats": {"Katana Stone": 200, ...}}, ...].
+  -- Keys starting with "Awaken" are awakening stages.
+  stages jsonb not null default '[]',
+  -- Per-copy progress: [{"done": ["4★", "SL10"], "awaken": "Atk"}, ...].
+  progress jsonb not null default '[]',
   source text not null default '',
   created_at timestamptz not null default now()
 );
@@ -27,8 +32,7 @@ alter table gbf_weapons disable row level security;
 
 -- Migrate an existing table created by the previous version of this file:
 alter table gbf_weapons drop column if exists category;
+alter table gbf_weapons add column if not exists stages jsonb not null default '[]';
+alter table gbf_weapons add column if not exists progress jsonb not null default '[]';
 
--- Seed data is loaded separately from scripts/gbf_seed.mjs (parsed from the
--- gbf.wiki Advanced Grids pages saved under gbf/). To rebuild:
---   node scripts/gbf_seed.mjs purge
---   node scripts/gbf_seed.mjs insert supabase/gbf_weapons_seed.json
+-- Weapons are managed from the app UI; nothing seeds or resets this table.

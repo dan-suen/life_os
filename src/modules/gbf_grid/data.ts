@@ -1,5 +1,23 @@
 export type Element = "Fire" | "Wind" | "Water" | "Earth" | "Light" | "Dark" | "Any";
 
+export type AwakenType = "Atk" | "Def" | "Sp" | "";
+export const AWAKEN_TYPES: AwakenType[] = ["", "Atk", "Def", "Sp"];
+
+/** Material name -> amount, e.g. { "Katana Stone": 200, "Skill Points": 12000 }. */
+export type Mats = Record<string, number>;
+
+/** One upgrade step every copy goes through. Stages whose key starts with "Awaken" are awakening. */
+export interface Stage {
+  key: string;
+  mats: Mats;
+}
+
+/** Progress of a single copy: which stage keys are done, and its awakening type. */
+export interface CopyProgress {
+  done: string[];
+  awaken: AwakenType;
+}
+
 export interface Weapon {
   id: number;
   element: Element;
@@ -7,6 +25,8 @@ export interface Weapon {
   rank: string;
   copies: string;
   source: string;
+  stages: Stage[];
+  progress: CopyProgress[];
 }
 
 export const ELEMENT_META: Record<Element, { boss: string; color: string; bg: string }> = {
@@ -49,5 +69,5 @@ export const GROUPS: string[] = [
 ];
 
 export const defaultWeaponForm = (source: string): Omit<Weapon, "id"> => ({
-  element: "Fire", name: "", rank: "", copies: "", source,
+  element: "Fire", name: "", rank: "", copies: "", source, stages: [], progress: [],
 });

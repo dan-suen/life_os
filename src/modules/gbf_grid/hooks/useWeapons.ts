@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../../../lib/supabase";
-import type { Weapon } from "../data";
+import type { CopyProgress, Weapon } from "../data";
 
-const COLS = "id,element,name,rank,copies,source";
+const COLS = "id,element,name,rank,copies,source,stages,progress";
 
 export function useWeapons() {
   const [weapons, setWeapons] = useState<Weapon[]>([]);
@@ -35,11 +35,23 @@ export function useWeapons() {
     const { error: updateError } = await supabase.from("gbf_weapons").update({
       element: form.element, name: form.name,
       rank: form.rank, copies: form.copies, source: form.source,
+      stages: form.stages, progress: form.progress,
     }).eq("id", form.id);
     if (updateError) { setError(updateError.message); setSaving(false); return false; }
     setWeapons(p => p.map(w => w.id === form.id ? form : w));
     setSaving(false);
     return true;
+  }
+
+  // Optimistic: tick boxes update instantly, rolled back if the write fails.
+  async function setProgress(id: number, progress: CopyProgress[]) {
+    const prev = weapons.find(w => w.id === id)?.progress ?? [];
+    setWeapons(p => p.map(w => w.id === id ? { ...w, progress } : w));
+    const { error: progressError } = await supabase.from("gbf_weapons").update({ progress }).eq("id", id);
+    if (progressError) {
+      setError(progressError.message);
+      setWeapons(p => p.map(w => w.id === id ? { ...w, progress: prev } : w));
+    }
   }
 
   async function remove(id: number) {
@@ -50,5 +62,5 @@ export function useWeapons() {
     setSaving(false);
   }
 
-  return { weapons, loading, saving, error, setError, add, update, remove };
+  return { weapons, loading, saving, error, setError, add, update, setProgress, remove };
 }
