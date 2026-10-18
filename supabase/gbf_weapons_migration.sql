@@ -23,7 +23,7 @@ create table if not exists gbf_weapons (
   -- Per-copy upgrade stages: [{"key": "4★", "mats": {"Katana Stone": 200, ...}}, ...].
   -- Keys starting with "Awaken" are awakening stages.
   stages jsonb not null default '[]',
-  -- Per-copy progress: [{"done": ["4★", "SL10"], "awaken": "Atk"}, ...].
+  -- Per-copy progress: [{"done": ["4★", "Skill"], "awaken": "Atk"}, ...].
   progress jsonb not null default '[]',
   source text not null default '',
   created_at timestamptz not null default now()

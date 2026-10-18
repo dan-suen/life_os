@@ -1,9 +1,5 @@
-import { useState } from "react";
 import { AWAKEN_TYPES, type AwakenType, type CopyProgress, type Mats, type Stage } from "../data";
-import {
-  ANIMA, QUARTZ, STAGE_KEYS, STONES, type SkillTable,
-  fmt, inferSkillTable, isSkillStage, matCategory, skillPoints, sortStages,
-} from "../materials";
+import { ANIMA, QUARTZ, STAGE_KEYS, STONES, isSkillStage, matCategory, sortStages } from "../materials";
 
 const labelStyle = { fontSize: "10px", fontWeight: 600 as const, color: "#666", textTransform: "uppercase" as const, letterSpacing: "0.05em" };
 const sel: React.CSSProperties = { border: "1px solid #d0d0d0", background: "#fff", color: "#1a1a1a", padding: "4px 6px", borderRadius: "5px", fontSize: "12px", cursor: "pointer" };
@@ -19,20 +15,14 @@ interface StagesProps {
   onChange: (stages: Stage[]) => void;
 }
 
-/** Per-copy upgrade stages: pick the stage, then material type → variant → amount. SL stages fill skill points automatically. */
+/** Per-copy upgrade stages: pick the stage, then material type → variant → amount. "Skill" is a plain toggle. */
 export function StagesEditor({ stages, onChange }: StagesProps) {
-  const [table, setTable] = useState<SkillTable>(() => inferSkillTable(stages));
   const unused = STAGE_KEYS.filter(k => !stages.some(s => s.key === k));
 
-  const withSkill = (key: string, mats: Mats, t: SkillTable): Mats =>
-    isSkillStage(key) ? { "Skill Points": skillPoints(t, key) } : mats;
+  const matsFor = (key: string, mats: Mats): Mats => isSkillStage(key) ? {} : mats;
   const set = (next: Stage[]) => onChange(sortStages(next));
   const patch = (i: number, s: Stage) => set(stages.map((x, j) => j === i ? s : x));
 
-  function changeTable(t: SkillTable) {
-    setTable(t);
-    set(stages.map(s => ({ ...s, mats: withSkill(s.key, s.mats, t) })));
-  }
   function setLine(i: number, oldName: string, name: string, n: number) {
     const entries = Object.entries(stages[i].mats).map(([k, v]) => k === oldName ? [name, n] as const : [k, v] as const);
     patch(i, { ...stages[i], mats: Object.fromEntries(entries) });
@@ -49,22 +39,16 @@ export function StagesEditor({ stages, onChange }: StagesProps) {
 
   return (
     <div style={box}>
-      <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-        <span style={labelStyle}>Upgrade stages (per copy)</span>
-        <select style={sel} value={table} onChange={e => changeTable(e.target.value as SkillTable)}>
-          <option value="standard">Skill table: Standard SSR</option>
-          <option value="special">Skill table: Bahamut / Ultima / Dark Opus / Draconic</option>
-        </select>
-      </div>
+      <span style={labelStyle}>Upgrade stages (per copy)</span>
       {stages.map((st, i) => (
         <div key={st.key} style={{ display: "flex", gap: "10px", alignItems: "flex-start", borderTop: i ? "1px solid #f3f3f3" : "none", paddingTop: i ? "8px" : 0 }}>
           <select style={{ ...sel, fontWeight: 600, width: "90px" }} value={st.key}
-            onChange={e => patch(i, { key: e.target.value, mats: withSkill(e.target.value, isSkillStage(st.key) ? {} : st.mats, table) })}>
+            onChange={e => patch(i, { key: e.target.value, mats: matsFor(e.target.value, st.mats) })}>
             {[st.key, ...unused].map(k => <option key={k}>{k}</option>)}
           </select>
           <div style={{ display: "flex", flexDirection: "column", gap: "4px", flex: 1 }}>
             {isSkillStage(st.key) ? (
-              <span style={{ fontSize: "12px", color: "#555", padding: "4px 0" }}>{fmt(st.mats["Skill Points"] ?? 0)} Skill Points</span>
+              <span style={{ fontSize: "12px", color: "#888", padding: "4px 0" }}>Skill fully levelled — no materials tracked</span>
             ) : (
               <>
                 {Object.entries(st.mats).map(([name, n]) => {
@@ -90,7 +74,7 @@ export function StagesEditor({ stages, onChange }: StagesProps) {
         </div>
       ))}
       {unused.length > 0 && (
-        <span style={link} onClick={() => set([...stages, { key: unused[0], mats: withSkill(unused[0], {}, table) }])}>+ stage</span>
+        <span style={link} onClick={() => set([...stages, { key: unused[0], mats: {} }])}>+ stage</span>
       )}
     </div>
   );
