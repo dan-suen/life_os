@@ -84,6 +84,7 @@ export const ANIMA = [
   "Uriel Anima", "Gabriel Anima",
   "Shiva Omega Anima", "Grimnir Omega Anima", "Europa Omega Anima", "Alexiel Omega Anima", "Avatar Omega Anima",
   "Astaroth Anima",
+  ...["Ifrit", "Cocytus", "Vohu Manah", "Sagittarius", "Corow", "Diablo"].flatMap(b => [`True Exo ${b} Anima`, `True Xeno ${b} Anima`]),
 ];
 
 /** Uncaps are sequential: ticking 5★ also ticks the lower uncaps this copy has, unticking 4★ also unticks 5★/6★. Skill/Awaken are independent. */
