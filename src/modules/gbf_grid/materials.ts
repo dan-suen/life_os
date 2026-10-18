@@ -1,10 +1,14 @@
 import type { AwakenType, CopyProgress, Mats, Stage, Weapon } from "./data";
 
-export type MatCategory = "Stone" | "Quartz" | "Anima" | "Pendant";
-export const MAT_CATEGORIES: MatCategory[] = ["Stone", "Quartz", "Anima", "Pendant"];
+export type MatCategory = "Stone" | "Quartz" | "Anima" | "Pendant" | "Luster" | "New World Quartz" | "Gold Brick" | "Eternity Sand";
+export const MAT_CATEGORIES: MatCategory[] = ["Stone", "Quartz", "Anima", "Pendant", "Luster", "New World Quartz", "Gold Brick", "Eternity Sand"];
+/** Single-item categories: the category name is the material name. */
+const SINGLE: MatCategory[] = ["New World Quartz", "Gold Brick", "Eternity Sand"];
 
 export function matCategory(name: string): MatCategory | null {
+  if (SINGLE.includes(name as MatCategory)) return name as MatCategory;
   if (/Anima$/.test(name)) return "Anima";
+  if (/Luster$/.test(name)) return "Luster";
   if (/Pendants?$/.test(name)) return "Pendant";
   if (QUARTZ.includes(name)) return "Quartz";  // element quartz only, not e.g. New World Quartz
   if (/Stone$/.test(name)) return "Stone";
@@ -41,7 +45,7 @@ export function remainingMats(w: Weapon): Mats {
   return out;
 }
 
-/** Sorted by category (stone, quartz, anima, pendant), then name; uncategorised (group-specific) keep their order. */
+/** Sorted by category (MAT_CATEGORIES order), then name; uncategorised (group-specific) keep their order. */
 export function sortedMats(mats: Mats): [string, number][] {
   const rank = (n: string) => { const c = matCategory(n); return c ? MAT_CATEGORIES.indexOf(c) : 99; };
   return Object.entries(mats).filter(([, v]) => v > 0).sort(([a], [b]) => rank(a) - rank(b) || (rank(a) < 99 ? a.localeCompare(b) : 0));
@@ -58,6 +62,7 @@ export const sortStages = (stages: Stage[]) =>
 export const STONES = ["Sword", "Dagger", "Spear", "Axe", "Staff", "Gun", "Melee", "Bow", "Harp", "Katana"].map(t => `${t} Stone`);
 export const QUARTZ = ["Fire", "Water", "Earth", "Wind", "Light", "Dark"].map(e => `${e} Quartz`);
 /** Anima options; extended as each group's data is entered (current gbf.wiki names). */
+export const LUSTERS = ["Ignis", "Aqua", "Terra", "Ventus"].map(e => `${e} Luster`);
 /** Pendant costs, e.g. awakening hammers bought at 50 pendants each. */
 export const PENDANTS = ["Pendants"];
 export const ANIMA = [
