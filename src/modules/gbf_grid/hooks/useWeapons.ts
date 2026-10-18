@@ -3,8 +3,9 @@ import { supabase } from "../../../lib/supabase";
 import type { CopyProgress, Mats, Weapon } from "../data";
 
 const COLS = "id,element,name,rank,copies,source,stages,progress";
-// Group-specific materials live in a side table, embedded through the weapon_id foreign key.
-const SELECT = `${COLS},gbf_weapon_extra_mats(stage,material,amount)`;
+// Optional parts, dropped from the query if their column/table doesn't exist yet. Group-specific
+// materials live in a side table, embedded through the weapon_id foreign key.
+const OPTIONAL = ["befoulment", "gbf_weapon_extra_mats(stage,material,amount)"];
 
 type ExtraRow = { stage: string; material: string; amount: number };
 function withExtras(row: Weapon & { gbf_weapon_extra_mats?: ExtraRow[] }): Weapon {
@@ -23,11 +24,14 @@ export function useWeapons() {
   useEffect(() => {
     async function load() {
       setLoading(true);
-      let { data, error: loadError }: { data: unknown[] | null; error: { message: string } | null } =
-        await supabase.from("gbf_weapons").select(SELECT).order("id");
-      // Side table not created yet: load weapons without extras rather than failing.
-      if (loadError?.message.includes("gbf_weapon_extra_mats")) {
-        ({ data, error: loadError } = await supabase.from("gbf_weapons").select(COLS).order("id"));
+      let optional = [...OPTIONAL];
+      let data: unknown[] | null = null;
+      let loadError: { message: string } | null = null;
+      for (;;) {
+        ({ data, error: loadError } = await supabase.from("gbf_weapons").select([COLS, ...optional].join(",")).order("id"));
+        const missing = loadError && optional.find(o => loadError!.message.includes(o.split("(")[0]));
+        if (!missing) break;
+        optional = optional.filter(o => o !== missing);
       }
       if (loadError) { setError(loadError.message); setLoading(false); return; }
       setWeapons((data ?? []).map(r => withExtras(r as Weapon & { gbf_weapon_extra_mats?: ExtraRow[] })));

@@ -18,6 +18,23 @@ export interface CopyProgress {
   awaken: AwakenType;
   /** Stage keys this copy skips, e.g. "Forge" on an unforged Revans copy. */
   skip?: string[];
+  /** Target befoulment for this copy (Odious), e.g. "DSR". */
+  bf?: BefoulmentType;
+}
+
+/** Befoulment types (gbf.wiki Befoulments). */
+export type BefoulmentType = "ATK" | "DSR" | "Skill" | "DEF" | "HP" | "C.A." | "M.A." | "Turn";
+export const BEFOULMENTS: BefoulmentType[] = ["DSR", "ATK", "Skill", "DEF", "HP", "C.A.", "M.A.", "Turn"];
+/** low = small values / easy to offset; medium = only at low permeation; high = never take. */
+export const BF_DANGER: Record<BefoulmentType, "low" | "medium" | "high"> = {
+  DSR: "low", ATK: "low", Skill: "medium", DEF: "medium", HP: "medium", "C.A.": "medium", "M.A.": "high", Turn: "high",
+};
+/** Highest permeation worth keeping for each befoulment, when taken at all. */
+export const BF_MAX_PRM: Partial<Record<BefoulmentType, number>> = { DEF: 2, HP: 2 };
+
+/** Weapon-level befoulment notes: BF types that undercut this weapon's own skills. */
+export interface BefoulmentInfo {
+  avoid?: BefoulmentType[];
 }
 
 export interface Weapon {
@@ -31,6 +48,7 @@ export interface Weapon {
   progress: CopyProgress[];
   /** Group-specific materials per stage key, joined from gbf_weapon_extra_mats (read-only here). */
   extras?: Record<string, Mats>;
+  befoulment?: BefoulmentInfo;
 }
 
 export const ELEMENT_META: Record<Element, { boss: string; color: string; bg: string }> = {
