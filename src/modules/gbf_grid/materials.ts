@@ -53,8 +53,8 @@ export function sortedMats(mats: Mats): [string, number][] {
 
 export const fmt = (n: number) => n.toLocaleString("en-US");
 
-/** Stage order within a copy. T1–T5 = transcendence stages. "Skill" = skill fully levelled (a toggle, no materials tracked). */
-export const STAGE_KEYS = ["1★", "2★", "3★", "4★", "5★", "6★", "T1", "T2", "T3", "T4", "T5", "Skill", "Awaken"] as const;
+/** Stage order within a copy. Craft = forging from a base weapon (e.g. Atma → Ultima); T1–T5 = transcendence stages. "Skill" = skill fully levelled (a toggle, no materials tracked). */
+export const STAGE_KEYS = ["Craft", "1★", "2★", "3★", "4★", "5★", "6★", "T1", "T2", "T3", "T4", "T5", "Skill", "Awaken"] as const;
 export const isSkillStage = (key: string) => key === "Skill";
 export const sortStages = (stages: Stage[]) =>
   [...stages].sort((a, b) => STAGE_KEYS.indexOf(a.key as never) - STAGE_KEYS.indexOf(b.key as never));
@@ -76,7 +76,7 @@ export const ANIMA = [
 ];
 
 /** Uncaps are sequential: ticking 5★ also ticks lower uncaps, unticking 4★ also unticks 5★/6★. Skill/Awaken are independent. */
-const UNCAPS = ["1★", "2★", "3★", "4★", "5★", "6★", "T1", "T2", "T3", "T4", "T5"];
+const UNCAPS = ["Craft", "1★", "2★", "3★", "4★", "5★", "6★", "T1", "T2", "T3", "T4", "T5"];
 export function toggleStage(done: string[], key: string): string[] {
   const tier = UNCAPS.indexOf(key);
   if (done.includes(key)) {
