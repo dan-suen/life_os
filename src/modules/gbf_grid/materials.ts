@@ -86,15 +86,15 @@ export const ANIMA = [
   "Astaroth Anima",
 ];
 
-/** Uncaps are sequential: ticking 5★ also ticks lower uncaps, unticking 4★ also unticks 5★/6★. Skill/Awaken are independent. */
+/** Uncaps are sequential: ticking 5★ also ticks the lower uncaps this copy has, unticking 4★ also unticks 5★/6★. Skill/Awaken are independent. */
 const UNCAPS = ["0★", "Craft", "Nova", "Coda", "1★", "2★", "3★", "4★", "5★", "6★", "T1", "T2", "T3", "T4", "T5", "Forge"];
-export function toggleStage(done: string[], key: string, skip: string[] = []): string[] {
+export function toggleStage(done: string[], key: string, available: string[] = [...UNCAPS]): string[] {
   const tier = UNCAPS.indexOf(key);
   if (done.includes(key)) {
     const drop = tier < 0 ? [key] : UNCAPS.slice(tier);
     return done.filter(k => !drop.includes(k));
   }
-  const add = tier < 0 ? [key] : UNCAPS.slice(0, tier + 1).filter(k => !skip.includes(k));
+  const add = tier < 0 ? [key] : UNCAPS.slice(0, tier + 1).filter(k => available.includes(k));
   return [...done, ...add.filter(k => !done.includes(k))];
 }
 

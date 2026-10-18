@@ -20,7 +20,8 @@ export function AwakenSelect({ copy, onChange }: { copy: CopyProgress; onChange:
 
 /** A toggle per stage for one copy; awakening stages are gold. */
 export function StageChips({ stages, copy, onChange }: { stages: Stage[]; copy: CopyProgress; onChange: (c: CopyProgress) => void }) {
-  const toggle = (key: string) => onChange({ ...copy, done: toggleStage(copy.done, key, copy.skip) });
+  const own = stagesFor({ stages }, copy).map(s => s.key);
+  const toggle = (key: string) => onChange({ ...copy, done: toggleStage(copy.done, key, own) });
   return (
     <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
       {stagesFor({ stages }, copy).map(st => (
