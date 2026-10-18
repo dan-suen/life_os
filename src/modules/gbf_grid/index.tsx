@@ -7,7 +7,7 @@ import { EditPanel } from "./components/EditPanel";
 import { AwakenSelect, StageChips } from "./components/ProgressCell";
 import { MatList } from "./components/MatList";
 import { MaterialsView } from "./components/MaterialsView";
-import { addMats, copiesNote, copiesOf, copyRemaining, remainingMats } from "./materials";
+import { addMats, copiesNote, copiesOf, copyRemaining, copyRemainingExtra, remainingExtra, remainingMats } from "./materials";
 
 type ElementFilter = Element | "All";
 const MATERIALS_TAB = "Σ Materials";
@@ -42,7 +42,8 @@ export default function GbfGridModule() {
   const viewDone = weapons.filter(w => isChecked(w.element, w.name)).length;
   const isMaterials = activeGroup === MATERIALS_TAB;
   const viewRemaining: Mats = {};
-  for (const w of weapons) addMats(viewRemaining, remainingMats(w));
+  const viewExtra: Mats = {};
+  for (const w of weapons) { addMats(viewRemaining, remainingMats(w)); addMats(viewExtra, remainingExtra(w)); }
 
   async function handleAdd(form: Omit<Weapon, "id">) {
     if (!form.name.trim()) return;
@@ -131,7 +132,7 @@ export default function GbfGridModule() {
               <span style={{ fontSize: "11px", fontWeight: 600, color: "#888", textTransform: "uppercase", letterSpacing: "0.05em", whiteSpace: "nowrap" }}>
                 Remaining{elementFilter !== "All" ? ` (${elementFilter})` : ""}
               </span>
-              {weapons.some(w => w.stages?.length) ? <MatList mats={viewRemaining} /> : <span style={{ fontSize: "12px", color: "#bbb" }}>No stage data yet</span>}
+              {weapons.some(w => w.stages?.length) ? <MatList mats={viewRemaining} extras={viewExtra} /> : <span style={{ fontSize: "12px", color: "#bbb" }}>No stage data yet</span>}
             </div>
             <table style={{ width: "100%", borderCollapse: "collapse", background: "#fff", borderRadius: "8px", overflow: "hidden", boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
               <thead>
@@ -163,7 +164,7 @@ export default function GbfGridModule() {
                         <AwakenSelect copy={copies[j]} onChange={c => setCopy(j, c)} />
                       </td>
                       <td style={{ ...tdStyle(), ...last(j) }}><StageChips stages={w.stages} copy={copies[j]} onChange={c => setCopy(j, c)} /></td>
-                      <td style={{ ...tdStyle(), ...last(j) }}><MatList mats={copyRemaining(w, copies[j])} /></td>
+                      <td style={{ ...tdStyle(), ...last(j) }}><MatList mats={copyRemaining(w, copies[j])} extras={copyRemainingExtra(w, copies[j])} /></td>
                     </>
                   ) : (
                     <td colSpan={3} style={{ ...tdStyle(), color: "#bbb" }}>{w.copies && !note ? `${w.copies} · ` : ""}no stage data</td>

@@ -1,8 +1,18 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../../../lib/supabase";
-import type { CopyProgress, Weapon } from "../data";
+import type { CopyProgress, Mats, Weapon } from "../data";
 
 const COLS = "id,element,name,rank,copies,source,stages,progress";
+// Group-specific materials live in a side table, embedded through the weapon_id foreign key.
+const SELECT = `${COLS},gbf_weapon_extra_mats(stage,material,amount)`;
+
+type ExtraRow = { stage: string; material: string; amount: number };
+function withExtras(row: Weapon & { gbf_weapon_extra_mats?: ExtraRow[] }): Weapon {
+  const { gbf_weapon_extra_mats: rows = [], ...w } = row;
+  const extras: Record<string, Mats> = {};
+  for (const r of rows) (extras[r.stage] ??= {})[r.material] = r.amount;
+  return { ...w, extras };
+}
 
 export function useWeapons() {
   const [weapons, setWeapons] = useState<Weapon[]>([]);
@@ -13,9 +23,14 @@ export function useWeapons() {
   useEffect(() => {
     async function load() {
       setLoading(true);
-      const { data, error: loadError } = await supabase.from("gbf_weapons").select(COLS).order("id");
+      let { data, error: loadError }: { data: unknown[] | null; error: { message: string } | null } =
+        await supabase.from("gbf_weapons").select(SELECT).order("id");
+      // Side table not created yet: load weapons without extras rather than failing.
+      if (loadError?.message.includes("gbf_weapon_extra_mats")) {
+        ({ data, error: loadError } = await supabase.from("gbf_weapons").select(COLS).order("id"));
+      }
       if (loadError) { setError(loadError.message); setLoading(false); return; }
-      setWeapons((data ?? []) as Weapon[]);
+      setWeapons((data ?? []).map(r => withExtras(r as Weapon & { gbf_weapon_extra_mats?: ExtraRow[] })));
       setLoading(false);
     }
     load();

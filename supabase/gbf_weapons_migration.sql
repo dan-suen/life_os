@@ -35,4 +35,17 @@ alter table gbf_weapons drop column if exists category;
 alter table gbf_weapons add column if not exists stages jsonb not null default '[]';
 alter table gbf_weapons add column if not exists progress jsonb not null default '[]';
 
--- Weapons are managed from the app UI; nothing seeds or resets this table.
+-- Group-specific upgrade materials (e.g. World Idean / Veritas / Gospel), kept out of
+-- gbf_weapons so only the weapons that use them carry them. Amounts are per copy, per stage;
+-- `stage` matches a key in gbf_weapons.stages.
+create table if not exists gbf_weapon_extra_mats (
+  id bigint generated always as identity primary key,
+  weapon_id bigint not null references gbf_weapons(id) on delete cascade,
+  stage text not null,
+  material text not null,
+  amount integer not null check (amount > 0),
+  unique (weapon_id, stage, material)
+);
+alter table gbf_weapon_extra_mats disable row level security;
+
+-- Weapons are managed from the app UI; nothing seeds or resets these tables.

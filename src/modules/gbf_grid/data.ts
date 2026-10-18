@@ -27,6 +27,8 @@ export interface Weapon {
   source: string;
   stages: Stage[];
   progress: CopyProgress[];
+  /** Group-specific materials per stage key, joined from gbf_weapon_extra_mats (read-only here). */
+  extras?: Record<string, Mats>;
 }
 
 export const ELEMENT_META: Record<Element, { boss: string; color: string; bg: string }> = {

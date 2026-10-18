@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ELEMENT_META, type Element, type Weapon } from "../data";
-import { MAT_CATEGORIES, type MatCategory, fmt, matCategory, remainingMats, sortedMats } from "../materials";
+import { MAT_CATEGORIES, type MatCategory, fmt, matCategory, remainingExtra, remainingMats, sortedMats } from "../materials";
 
 interface Props {
   weapons: Weapon[];
@@ -17,6 +17,8 @@ const chip = (on: boolean): React.CSSProperties => ({
 export function MaterialsView({ weapons, groups, elementFilter }: Props) {
   const [hiddenGroups, setHiddenGroups] = useState<Set<string>>(new Set());
   const [cats, setCats] = useState<Set<MatCategory>>(new Set(MAT_CATEGORIES));
+  const [showExtra, setShowExtra] = useState(true);
+  const hasExtras = weapons.some(w => Object.keys(w.extras ?? {}).length);
   const [open, setOpen] = useState<string | null>(null);
 
   const inScope = weapons.filter(w =>
@@ -32,6 +34,9 @@ export function MaterialsView({ weapons, groups, elementFilter }: Props) {
       if (!c || !cats.has(c)) continue;
       byMat.set(name, [...(byMat.get(name) ?? []), { w, n }]);
     }
+    if (showExtra) {
+      for (const [name, n] of sortedMats(remainingExtra(w))) byMat.set(name, [...(byMat.get(name) ?? []), { w, n }]);
+    }
   }
   const totals = Object.fromEntries([...byMat].map(([name, list]) => [name, list.reduce((a, x) => a + x.n, 0)]));
   const rows = sortedMats(totals);
@@ -45,6 +50,7 @@ export function MaterialsView({ weapons, groups, elementFilter }: Props) {
         <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", alignItems: "center" }}>
           <span style={{ fontSize: "11px", color: "#888", width: "70px" }}>MATERIAL</span>
           {MAT_CATEGORIES.map(c => <span key={c} style={chip(cats.has(c))} onClick={() => toggleCat(c)}>{c}</span>)}
+          {hasExtras && <span style={chip(showExtra)} onClick={() => setShowExtra(v => !v)}>Group-specific</span>}
         </div>
         <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", alignItems: "center" }}>
           <span style={{ fontSize: "11px", color: "#888", width: "70px" }}>GROUPS</span>
@@ -70,7 +76,7 @@ export function MaterialsView({ weapons, groups, elementFilter }: Props) {
             return [
               <tr key={name} onClick={() => setOpen(isOpen ? null : name)} style={{ cursor: "pointer", borderBottom: "1px solid #f0f0f0" }}>
                 <td style={{ padding: "10px 16px", fontSize: "13px", fontWeight: 500 }}>{isOpen ? "▾" : "▸"} {name}</td>
-                <td style={{ padding: "10px 16px", fontSize: "12px", color: "#888" }}>{matCategory(name)}</td>
+                <td style={{ padding: "10px 16px", fontSize: "12px", color: "#888" }}>{matCategory(name) ?? `${list[0].w.source} (group)`}</td>
                 <td style={{ padding: "10px 16px", fontSize: "13px", fontWeight: 700, textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{fmt(total)}</td>
                 <td style={{ padding: "10px 16px", fontSize: "12px", color: "#888", textAlign: "right" }}>{list.length}</td>
               </tr>,

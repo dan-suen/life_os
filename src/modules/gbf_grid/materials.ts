@@ -6,7 +6,7 @@ export const MAT_CATEGORIES: MatCategory[] = ["Stone", "Quartz", "Anima", "Penda
 export function matCategory(name: string): MatCategory | null {
   if (/Anima$/.test(name)) return "Anima";
   if (/Pendants?$/.test(name)) return "Pendant";
-  if (/Quartz$/.test(name)) return "Quartz";
+  if (QUARTZ.includes(name)) return "Quartz";  // element quartz only, not e.g. New World Quartz
   if (/Stone$/.test(name)) return "Stone";
   return null;
 }
@@ -41,21 +41,21 @@ export function remainingMats(w: Weapon): Mats {
   return out;
 }
 
-/** Sorted by category (stone, quartz, anima, pendant), then name. */
+/** Sorted by category (stone, quartz, anima, pendant), then name; uncategorised (group-specific) keep their order. */
 export function sortedMats(mats: Mats): [string, number][] {
   const rank = (n: string) => { const c = matCategory(n); return c ? MAT_CATEGORIES.indexOf(c) : 99; };
-  return Object.entries(mats).filter(([, v]) => v > 0).sort(([a], [b]) => rank(a) - rank(b) || a.localeCompare(b));
+  return Object.entries(mats).filter(([, v]) => v > 0).sort(([a], [b]) => rank(a) - rank(b) || (rank(a) < 99 ? a.localeCompare(b) : 0));
 }
 
 export const fmt = (n: number) => n.toLocaleString("en-US");
 
-/** Stage order within a copy. "Skill" = skill fully levelled (a toggle, no materials tracked). */
-export const STAGE_KEYS = ["1★", "2★", "3★", "4★", "5★", "6★", "Skill", "Awaken"] as const;
+/** Stage order within a copy. T1–T5 = transcendence stages. "Skill" = skill fully levelled (a toggle, no materials tracked). */
+export const STAGE_KEYS = ["1★", "2★", "3★", "4★", "5★", "6★", "T1", "T2", "T3", "T4", "T5", "Skill", "Awaken"] as const;
 export const isSkillStage = (key: string) => key === "Skill";
 export const sortStages = (stages: Stage[]) =>
   [...stages].sort((a, b) => STAGE_KEYS.indexOf(a.key as never) - STAGE_KEYS.indexOf(b.key as never));
 
-export const STONES = ["Sabre", "Dagger", "Spear", "Axe", "Staff", "Gun", "Melee", "Bow", "Harp", "Katana"].map(t => `${t} Stone`);
+export const STONES = ["Sword", "Dagger", "Spear", "Axe", "Staff", "Gun", "Melee", "Bow", "Harp", "Katana"].map(t => `${t} Stone`);
 export const QUARTZ = ["Fire", "Water", "Earth", "Wind", "Light", "Dark"].map(e => `${e} Quartz`);
 /** Anima options; extended as each group's data is entered (current gbf.wiki names). */
 /** Pendant costs, e.g. awakening hammers bought at 50 pendants each. */
@@ -66,10 +66,12 @@ export const ANIMA = [
   "Credo Omega Anima", "Luminiera Omega Anima",
   "Qilin Omega Anima", "Huanglong Omega Anima",
   "Uriel Anima", "Gabriel Anima",
+  "Shiva Omega Anima", "Grimnir Omega Anima", "Europa Omega Anima", "Alexiel Omega Anima", "Avatar Omega Anima",
+  "Astaroth Anima",
 ];
 
 /** Uncaps are sequential: ticking 5★ also ticks lower uncaps, unticking 4★ also unticks 5★/6★. Skill/Awaken are independent. */
-const UNCAPS = ["1★", "2★", "3★", "4★", "5★", "6★"];
+const UNCAPS = ["1★", "2★", "3★", "4★", "5★", "6★", "T1", "T2", "T3", "T4", "T5"];
 export function toggleStage(done: string[], key: string): string[] {
   const tier = UNCAPS.indexOf(key);
   if (done.includes(key)) {
@@ -78,6 +80,19 @@ export function toggleStage(done: string[], key: string): string[] {
   }
   const add = tier < 0 ? [key] : UNCAPS.slice(0, tier + 1);
   return [...done, ...add.filter(k => !done.includes(k))];
+}
+
+/** Group-specific materials still needed for one copy (from gbf_weapon_extra_mats). */
+export function copyRemainingExtra(w: Weapon, c: CopyProgress): Mats {
+  const out: Mats = {};
+  for (const st of w.stages ?? []) if (!c.done.includes(st.key)) addMats(out, w.extras?.[st.key] ?? {});
+  return out;
+}
+
+export function remainingExtra(w: Weapon): Mats {
+  const out: Mats = {};
+  for (const c of copiesOf(w)) addMats(out, copyRemainingExtra(w, c));
+  return out;
 }
 
 /** Materials still needed for one copy. */
