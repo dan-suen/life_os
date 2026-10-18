@@ -25,6 +25,7 @@ export default function GbfGridModule() {
   const { weapons: WEAPONS, loading: weaponsLoading, saving, error: weaponsError, setError: setWeaponsError, add, update, setProgress, remove } = useWeapons();
   const [showAdd, setShowAdd] = useState(false);
   const [editing, setEditing] = useState<Weapon | null>(null);
+  const [remainingOpen, setRemainingOpen] = useState(false);
 
   const loading = checkedLoading || weaponsLoading;
   const error = weaponsError ?? checkedError;
@@ -133,10 +134,17 @@ export default function GbfGridModule() {
               <EditPanel form={editing} saving={saving} onChange={setEditing} onSave={handleSaveEdit} onCancel={() => setEditing(null)} />
             )}
             <div style={{ display: "flex", gap: "16px", alignItems: "flex-start", background: "#fff", border: "1px solid #eee", borderRadius: "8px", padding: "12px 16px", marginBottom: "12px" }}>
-              <span style={{ fontSize: "11px", fontWeight: 600, color: "#888", textTransform: "uppercase", letterSpacing: "0.05em", whiteSpace: "nowrap" }}>
-                Remaining{elementFilter !== "All" ? ` (${elementFilter})` : ""}
-              </span>
-              {weapons.some(w => w.stages?.length) ? <MatList mats={viewRemaining} extras={viewExtra} /> : <span style={{ fontSize: "12px", color: "#bbb" }}>No stage data yet</span>}
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px", minWidth: 0 }}>
+                <span onClick={() => setRemainingOpen(o => !o)} style={{ fontSize: "11px", fontWeight: 600, color: "#888", textTransform: "uppercase", letterSpacing: "0.05em", whiteSpace: "nowrap", cursor: "pointer", userSelect: "none" }}>
+                  {remainingOpen ? "▾" : "▸"} Remaining{elementFilter !== "All" ? ` (${elementFilter})` : ""}
+                  <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0, marginLeft: "8px", color: "#aaa" }}>
+                    {weapons.some(w => w.stages?.length)
+                      ? `${Object.values(viewRemaining).filter(n => n > 0).length} materials${Object.values(viewExtra).some(n => n > 0) ? ` + ${Object.values(viewExtra).filter(n => n > 0).length} group-specific` : ""}`
+                      : "no stage data yet"}
+                  </span>
+                </span>
+                {remainingOpen && weapons.some(w => w.stages?.length) && <MatList mats={viewRemaining} extras={viewExtra} />}
+              </div>
               {activeGroup === "Odious" && (
                 <div style={{ marginLeft: "auto", fontSize: "12px", color: "#555", display: "flex", flexDirection: "column", gap: "2px" }}>
                   <span style={{ fontSize: "11px", fontWeight: 600, color: "#888", textTransform: "uppercase", letterSpacing: "0.05em" }}>Grid BF budget (in-grid copies)</span>
@@ -189,7 +197,7 @@ export default function GbfGridModule() {
                         {isOdious && <div style={{ marginTop: "3px" }}><BfEditor copy={copies[j]} avoid={w.befoulment?.avoid} used={bfUsed[w.element] ?? {}} onChange={c => setCopy(j, c)} /></div>}
                       </td>
                       <td style={{ ...tdStyle(), ...last(j) }}><StageChips stages={w.stages} copy={copies[j]} onChange={c => setCopy(j, c)} /></td>
-                      <td style={{ ...tdStyle(), ...last(j) }}><MatList mats={copyRemaining(w, copies[j])} extras={copyRemainingExtra(w, copies[j])} /></td>
+                      <td style={{ ...tdStyle(), ...last(j) }}><MatList mats={copyRemaining(w, copies[j])} extras={copyRemainingExtra(w, copies[j])} limit={4} /></td>
                     </>
                   ) : (
                     <td colSpan={3} style={{ ...tdStyle(), color: "#bbb" }}>{w.copies && !note ? `${w.copies} · ` : ""}no stage data</td>
