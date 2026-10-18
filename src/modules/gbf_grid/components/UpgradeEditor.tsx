@@ -1,5 +1,5 @@
 import { AWAKEN_TYPES, type AwakenType, type CopyProgress, type Mats, type Stage } from "../data";
-import { ANIMA, QUARTZ, STAGE_KEYS, STONES, isSkillStage, matCategory, sortStages } from "../materials";
+import { ANIMA, PENDANTS, QUARTZ, STAGE_KEYS, STONES, isSkillStage, matCategory, sortStages } from "../materials";
 
 const labelStyle = { fontSize: "10px", fontWeight: 600 as const, color: "#666", textTransform: "uppercase" as const, letterSpacing: "0.05em" };
 const sel: React.CSSProperties = { border: "1px solid #d0d0d0", background: "#fff", color: "#1a1a1a", padding: "4px 6px", borderRadius: "5px", fontSize: "12px", cursor: "pointer" };
@@ -7,7 +7,7 @@ const num: React.CSSProperties = { ...sel, width: "80px", cursor: "text" };
 const link: React.CSSProperties = { fontSize: "11px", color: "#2253c7", cursor: "pointer", userSelect: "none" };
 const box: React.CSSProperties = { background: "#fff", border: "1px solid #eee", borderRadius: "6px", padding: "10px 12px", display: "flex", flexDirection: "column", gap: "8px" };
 
-const VARIANTS = { Stone: STONES, Quartz: QUARTZ, Anima: ANIMA } as const;
+const VARIANTS = { Stone: STONES, Quartz: QUARTZ, Anima: ANIMA, Pendant: PENDANTS } as const;
 type Kind = keyof typeof VARIANTS;
 
 interface StagesProps {
@@ -29,7 +29,7 @@ export function StagesEditor({ stages, onChange }: StagesProps) {
   }
   function addLine(i: number) {
     const taken = Object.keys(stages[i].mats);
-    const name = [...STONES, ...QUARTZ, ...ANIMA].find(n => !taken.includes(n))!;
+    const name = [...STONES, ...QUARTZ, ...ANIMA, ...PENDANTS].find(n => !taken.includes(n))!;
     patch(i, { ...stages[i], mats: { ...stages[i].mats, [name]: 0 } });
   }
   function removeLine(i: number, name: string) {

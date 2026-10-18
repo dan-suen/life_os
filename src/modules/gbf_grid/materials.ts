@@ -1,10 +1,11 @@
 import type { AwakenType, CopyProgress, Mats, Stage, Weapon } from "./data";
 
-export type MatCategory = "Stone" | "Quartz" | "Anima";
-export const MAT_CATEGORIES: MatCategory[] = ["Stone", "Quartz", "Anima"];
+export type MatCategory = "Stone" | "Quartz" | "Anima" | "Pendant";
+export const MAT_CATEGORIES: MatCategory[] = ["Stone", "Quartz", "Anima", "Pendant"];
 
 export function matCategory(name: string): MatCategory | null {
   if (/Anima$/.test(name)) return "Anima";
+  if (/Pendants?$/.test(name)) return "Pendant";
   if (/Quartz$/.test(name)) return "Quartz";
   if (/Stone$/.test(name)) return "Stone";
   return null;
@@ -40,7 +41,7 @@ export function remainingMats(w: Weapon): Mats {
   return out;
 }
 
-/** Sorted by category (stone, quartz, anima), then name. */
+/** Sorted by category (stone, quartz, anima, pendant), then name. */
 export function sortedMats(mats: Mats): [string, number][] {
   const rank = (n: string) => { const c = matCategory(n); return c ? MAT_CATEGORIES.indexOf(c) : 99; };
   return Object.entries(mats).filter(([, v]) => v > 0).sort(([a], [b]) => rank(a) - rank(b) || a.localeCompare(b));
@@ -57,6 +58,8 @@ export const sortStages = (stages: Stage[]) =>
 export const STONES = ["Sabre", "Dagger", "Spear", "Axe", "Staff", "Gun", "Melee", "Bow", "Harp", "Katana"].map(t => `${t} Stone`);
 export const QUARTZ = ["Fire", "Water", "Earth", "Wind", "Light", "Dark"].map(e => `${e} Quartz`);
 /** Anima options; extended as each group's data is entered (current gbf.wiki names). */
+/** Pendant costs, e.g. awakening hammers bought at 50 pendants each. */
+export const PENDANTS = ["Pendants"];
 export const ANIMA = [
   "Horus Anima", "Horus Omega Anima",
   "Metatron Omega Anima", "Michael Anima", "Raphael Anima",
