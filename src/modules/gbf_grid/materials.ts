@@ -92,6 +92,7 @@ export const ANIMA = [
   "Ira Omega Anima", "Colossus Omega Anima", "Aura Omega Anima", "Tiamat Omega Anima",
   "Mare Omega Anima", "Leviathan Omega Anima", "Arbos Omega Anima", "Yggdrasil Omega Anima",
   "Ater Omega Anima", "Celeste Omega Anima",
+  "Atum Omega Anima",
   "Qilin Omega Anima", "Huanglong Omega Anima",
   "Uriel Anima", "Gabriel Anima",
   "Shiva Omega Anima", "Grimnir Omega Anima", "Europa Omega Anima", "Alexiel Omega Anima", "Avatar Omega Anima",
