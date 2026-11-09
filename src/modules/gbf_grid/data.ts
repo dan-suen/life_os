@@ -117,6 +117,7 @@ export const GROUPS: string[] = [
   "Militis",
   "New World Foundation",
   "Proven",
+  "Class Champion",
   "Beast",
   "Astral",
   "Premium",
